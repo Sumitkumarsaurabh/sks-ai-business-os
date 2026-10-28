@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKS AI Business OS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fb;color:#172033;font-family:Arial,sans-serif}
+header{background:#102b50;color:white;padding:20px 16px}
+header h1{margin:0;font-size:23px}
+header p{margin:7px 0 0;color:#c9dcf5}
+nav{display:flex;overflow:auto;gap:8px;padding:12px;background:white;position:sticky;top:0}
+button{border:0;border-radius:9px;padding:11px 14px;background:#175cd3;color:white;font-weight:bold;cursor:pointer}
+nav button{white-space:nowrap;background:#e8eef8;color:#17345c}
+nav button.active{background:#175cd3;color:white}
+main{padding:14px;max-width:900px;margin:auto}
+section{display:none}
+section.active{display:block}
+.card{background:white;padding:16px;border-radius:14px;margin-bottom:13px;box-shadow:0 2px 10px #1720330b}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.metric{background:white;border-radius:12px;padding:15px}
+.metric small{color:#58677c}
+.metric strong{display:block;font-size:21px;margin-top:8px;overflow-wrap:anywhere}
+input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ccd5e2;border-radius:8px;font-size:16px;background:white}
+label{font-size:14px;font-weight:bold}
+h2{font-size:20px}
+h3{margin-top:0}
+.item{border-bottom:1px solid #e5eaf1;padding:12px 0;overflow-wrap:anywhere}
+.item:last-child{border-bottom:0}
+.muted{color:#637187;font-size:13px}
+.danger{background:#b42318}
+.secondary{background:#e8eef8;color:#17345c}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row button{flex:1}
+.notice{background:#fff4d6;padding:12px;border-radius:9px;font-size:13px;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <h1>💧 SKS AI Business OS</h1>
+  <p>SKS Group · आपका बिज़नेस मैनेजर</p>
+</header>
+
+<nav id="nav">
+  <button class="active" data-tab="dashboard">डैशबोर्ड</button>
+  <button data-tab="customers">ग्राहक</button>
+  <button data-tab="orders">ऑर्डर</button>
+  <button data-tab="payments">भुगतान/उधार</button>
+  <button data-tab="expenses">खर्च</button>
+  <button data-tab="backup">बैकअप</button>
+</nav>
+
+<main>
+<section id="dashboard" class="active">
+  <h2>बिज़नेस डैशबोर्ड</h2>
+  <div class="metrics">
+    <div class="metric"><small>कुल ग्राहक</small><strong id="mCustomers">0</strong></div>
+    <div class="metric"><small>ऑर्डर वैल्यू</small><strong id="mSales">₹0</strong></div>
+    <div class="metric"><small>भुगतान प्राप्त</small><strong id="mPaid">₹0</strong></div>
+    <div class="metric"><small>अनुमानित उधार</small><strong id="mDue">₹0</strong></div>
+    <div class="metric"><small>कुल दर्ज खर्च</small><strong id="mExpenses">₹0</strong></div>
+    <div class="metric"><small>पेंडिंग ऑर्डर</small><strong id="mPending">0</strong></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>हाल के ऑर्डर</h3>
+    <div id="recentOrders" class="muted">अभी कोई ऑर्डर नहीं है।</div>
+  </div>
+  <div class="notice">महत्वपूर्ण: डेटा इसी ब्राउज़र में सेव होता है। ब्राउज़र का डेटा साफ करने या डिवाइस बदलने से रिकॉर्ड खो सकते हैं। बैकअप नियमित रूप से डाउनलोड करें।</div>
+</section>
+
+<section id="customers">
+  <div class="card">
+    <h2>नया ग्राहक</h2>
+    <form id="customerForm">
+      <label>दुकान/ग्राहक का नाम *</label>
+      <input id="cName" required placeholder="जैसे शर्मा जनरल स्टोर">
+      <label>मोबाइल नंबर</label>
+      <input id="cPhone" inputmode="tel" placeholder="ग्राहक का नंबर">
+      <label>गाँव / इलाका</label>
+      <input id="cArea" placeholder="गाँव या बाजार">
+      <label>शुरुआती बकाया (₹)</label>
+      <input id="cOpening" type="number" min="0" step="0.01" value="0">
+      <button type="submit">ग्राहक सेव करें</button>
+    </form>
+  </div>
+  <div class="card"><h3>ग्राहक सूची</h3><input id="customerSearch" placeholder="नाम या मोबाइल से खोजें"><div id="customerList"></div></div>
+</section>
+
+<section id="orders">
+  <div class="card">
+    <h2>नया ऑर्डर</h2>
+    <form id="orderForm">
+      <label>ग्राहक *</label><select id="oCustomer" required></select>
+      <label>प्रोडक्ट</label>
+      <select id="oProduct">
+        <option>1L बोतल पैक</option><option>500ml बोतल पैक</option>
+        <option>2L बोतल पैक</option><option>250ml बोतल पैक</option>
+        <option>20L जार</option><option>अन्य</option>
+      </select>
+      <label>पैकेट / जार की संख्या</label><input id="oQty" type="number" min="1" value="1" required>
+      <label>प्रति पैकेट / जार कीमत (₹)</label><input id="oPrice" type="number" min="0" step="0.01" value="0" required>
+      <label>ऑर्डर तारीख</label><input id="oDate" type="date" required>
+      <label>स्थिति</label>
+      <select id="oStatus"><option>Pending</option><option>Confirmed</option><option>Delivered</option><option>Cancelled</option></select>
+      <button type="submit">ऑर्डर सेव करें</button>
+    </form>
+  </div>
+  <div class="card"><h3>ऑर्डर रिकॉर्ड</h3><div id="orderList"></div></div>
+</section>
+
+<section id="payments">
+  <div class="card">
+    <h2>भुगतान दर्ज करें</h2>
+    <form id="paymentForm">
+      <label>ग्राहक *</label><select id="pCustomer" required></select>
+      <label>प्राप्त राशि (₹)</label><input id="pAmount" type="number" min="0.01" step="0.01" required>
+      <label>भुगतान तारीख</label><input id="pDate" type="date" required>
+      <label>तरीका</label><select id="pMethod"><option>Cash</option><option>UPI</option><option>Bank</option><option>अन्य</option></select>
+      <label>नोट / संदर्भ</label><input id="pNote" placeholder="वैकल्पिक">
+      <button type="submit">भुगतान सेव करें</button>
+    </form>
+  </div>
+  <div class="card"><h3>ग्राहक-वार बकाया</h3><div id="dueList"></div></div>
+  <div class="card"><h3>भुगतान इतिहास</h3><div id="paymentList"></div></div>
+</section>
+
+<section id="expenses">
+  <div class="card">
+    <h2>नया खर्च</h2>
+    <form id="expenseForm">
+      <label>खर्च का प्रकार</label>
+      <select id="eCategory"><option>बोतल / पैकिंग</option><option>लेबल</option><option>बिजली</option><option>मजदूरी</option><option>डिलीवरी / पेट्रोल</option><option>मशीन / मरम्मत</option><option>अन्य</option></select>
+      <label>राशि (₹)</label><input id="eAmount" type="number" min="0.01" step="0.01" required>
+      <label>तारीख</label><input id="eDate" type="date" required>
+      <label>नोट</label><input id="eNote" placeholder="वैकल्पिक">
+      <button type="submit">खर्च सेव करें</button>
+    </form>
+  </div>
+  <div class="card"><h3>खर्च रिकॉर्ड</h3><div id="expenseList"></div></div>
+</section>
+
+<section id="backup">
+  <div class="card">
+    <h2>डेटा बैकअप</h2>
+    <p>अपने ग्राहक, ऑर्डर, भुगतान और खर्च का बैकअप JSON फ़ाइल में डाउनलोड करो। इसे सुरक्षित जगह रखो।</p>
+    <button id="exportBtn">बैकअप डाउनलोड करें</button>
+    <hr style="border:0;border-top:1px solid #ddd;margin:20px 0">
+    <h3>बैकअप वापस लोड करें</h3>
+    <input id="importFile" type="file" accept=".json,application/json">
+    <button id="importBtn" class="secondary">बैकअप इम्पोर्ट करें</button>
+    <p class="muted">इम्पोर्ट करने पर मौजूदा रिकॉर्ड बदल जाएँगे। पहले वर्तमान डेटा का बैकअप लें।</p>
+    <hr style="border:0;border-top:1px solid #ddd;margin:20px 0">
+    <h3>सिस्टम की स्थिति</h3>
+    <p id="systemInfo" class="muted"></p>
+    <div class="notice">यह अभी स्थानीय MVP है। इसमें लॉगिन, ऑनलाइन क्लाउड सिंक, AI API, WhatsApp या कॉल ऑटोमेशन नहीं है।</div>
+  </div>
+</section>
+</main>
+
+<script>
+const KEY = "sks_business_os_v1";
+const emptyData = () => ({customers:[],orders:[],payments:[],expenses:[]});
+let data = loadData();
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return emptyData();
+    const parsed = JSON.parse(raw);
+    return {
+      customers:Array.isArray(parsed.customers)?parsed.customers:[],
+      orders:Array.isArray(parsed.orders)?parsed.orders:[],
+      payments:Array.isArray(parsed.payments)?parsed.payments:[],
+      expenses:Array.isArray(parsed.expenses)?parsed.expenses:[]
+    };
+  }catch(e){ return emptyData(); }
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render();}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function val(id){return document.getElementById(id).value;}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function num(x){return Number(x)||0;}
+function money(x){return "₹"+num(x).toLocaleString("en-IN",{maximumFractionDigits:2,minimumFractionDigits:0});}
+function today(){return new Date().toISOString().slice(0,10);}
+function customerName(cid){return data.customers.find(c=>c.id===cid)?.name||"हटाया गया ग्राहक";}
+function orderValue(o){return o.status==="Cancelled"?0:num(o.qty)*num(o.price);}
+function customerBalance(c){
+  const sales=data.orders.filter(o=>o.customerId===c.id).reduce((s,o)=>s+orderValue(o),0);
+  const paid=data.payments.filter(p=>p.customerId===c.id).reduce((s,p)=>s+num(p.amount),0);
+  return num(c.opening)+sales-paid;
+}
+function el(id){return document.getElementById(id);}
+function showList(id,html,empty){el(id).innerHTML=html||`<p class="muted">${empty}</p>`;}
+
+document.querySelectorAll("nav button").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b===btn));
+  document.querySelectorAll("main section").forEach(s=>s.classList.toggle("active",s.id===btn.dataset.tab));
+  render();
+}));
+
+el("customerForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  data.customers.push({id:id(),name:val("cName").trim(),phone:val("cPhone").trim(),area:val("cArea").trim(),opening:num(val("cOpening")),created:today()});
+  e.target.reset();el("cOpening").value="0";save();alert("ग्राहक सेव हो गया।");
+});
+
+el("orderForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!data.customers.some(c=>c.id===val("oCustomer"))){alert("पहले ग्राहक जोड़ें।");return;}
+  data.orders.push({id:id(),customerId:val("oCustomer"),product:val("oProduct"),qty:num(val("oQty")),price:num(val("oPrice")),date:val("oDate"),status:val("oStatus")});
+  e.target.reset();el("oDate").value=today();save();alert("ऑर्डर सेव हो गया।");
+});
+
+el("paymentForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!data.customers.some(c=>c.id===val("pCustomer"))){alert("पहले ग्राहक जोड़ें।");return;}
+  data.payments.push({id:id(),customerId:val("pCustomer"),amount:num(val("pAmount")),date:val("pDate"),method:val("pMethod"),note:val("pNote").trim()});
+  e.target.reset();el("pDate").value=today();save();alert("भुगतान सेव हो गया।");
+});
+
+el("expenseForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  data.expenses.push({id:id(),category:val("eCategory"),amount:num(val("eAmount")),date:val("eDate"),note:val("eNote").trim()});
+  e.target.reset();el("eDate").value=today();save();alert("खर्च सेव हो गया।");
+});
+
+el("customerSearch").addEventListener("input",renderCustomers);
+
+function renderCustomers(){
+  const q=(val("customerSearch")||"").toLowerCase();
+  const list=data.customers.filter(c=>(c.name+" "+c.phone+" "+c.area).toLowerCase().includes(q));
+  showList("customerList",list.map(c=>`
+    <div class="item"><b>${esc(c.name)}</b><br>
+    <span class="muted">${esc(c.phone)} · ${esc(c.area)}</span><br>
+    शुरुआती बकाया: ${money(c.opening)} · वर्तमान अनुमानित बकाया: <b>${money(customerBalance(c))}</b><br>
+    <button class="danger" onclick="deleteCustomer('${c.id}')">ग्राहक हटाएँ</button></div>`).join(""),"अभी कोई ग्राहक नहीं।");
+}
+function deleteCustomer(cid){
+  if(!confirm("ग्राहक हटाएँ? उसके पुराने वित्तीय रिकॉर्ड सुरक्षित रहेंगे, लेकिन ग्राहक नाम की जगह हटाया गया ग्राहक दिखेगा।"))return;
+  data.customers=data.customers.filter(c=>c.id!==cid);save();
+}
+function renderOrders(){
+  const list=[...data.orders].reverse();
+  showList("orderList",list.map(o=>`
+    <div class="item"><b>${esc(customerName(o.customerId))}</b> · ${esc(o.product)}<br>
+    ${o.qty} × ${money(o.price)} = <b>${money(orderValue(o))}</b><br>
+    <span class="muted">${esc(o.date)} · ${esc(o.status)}</span><br>
+    <label>स्थिति बदलें</label>
+    <select onchange="updateStatus('${o.id}',this.value)">
+      ${["Pending","Confirmed","Delivered","Cancelled"].map(s=>`<option ${s===o.status?"selected":""}>${s}</option>`).join("")}
+    </select>
+    <button class="secondary" onclick="deleteOrder('${o.id}')">ऑर्डर हटाएँ</button></div>`).join(""),"अभी कोई ऑर्डर नहीं।");
+}
+function updateStatus(oid,status){const o=data.orders.find(x=>x.id===oid);if(o){o.status=status;save();}}
+function deleteOrder(oid){
+  if(!confirm("इस ऑर्डर को हटाएँ? यदि यह पुराना वित्तीय रिकॉर्ड है, तो बेहतर है उसे Cancelled करें।"))return;
+  data.orders=data.orders.filter(o=>o.id!==oid);save();
+}
+function renderPayments(){
+  showList("dueList",data.customers.map(c=>`
+    <div class="item"><b>${esc(c.name)}</b><br>
+    बकाया अनुमान: <b>${money(customerBalance(c))}</b><br>
+    <span class="muted">${esc(c.phone)}</span></div>`).join(""),"पहले ग्राहक जोड़ें।");
+  showList("paymentList",[...data.payments].reverse().map(p=>`
+    <div class="item"><b>${esc(customerName(p.customerId))}</b> · ${money(p.amount)}<br>
+    <span class="muted">${esc(p.date)} · ${esc(p.method)} · ${esc(p.note)}</span></div>`).join(""),"अभी कोई भुगतान नहीं।");
+}
+function renderExpenses(){
+  showList("expenseList",[...data.expenses].reverse().map(x=>`
+    <div class="item"><b>${esc(x.category)}</b> · ${money(x.amount)}<br>
+    <span class="muted">${esc(x.date)} · ${esc(x.note)}</span></div>`).join(""),"अभी कोई खर्च नहीं।");
+}
+function render(){
+  const sales=data.orders.reduce((s,o)=>s+orderValue(o),0);
+  const paid=data.payments.reduce((s,p)=>s+num(p.amount),0);
+  const expenses=data.expenses.reduce((s,x)=>s+num(x.amount),0);
+  const due=data.customers.reduce((s,c)=>s+customerBalance(c),0);
+  el("mCustomers").textContent=data.customers.length;
+  el("mSales").textContent=money(sales);
+  el("mPaid").textContent=money(paid);
+  el("mDue").textContent=money(due);
+  el("mExpenses").textContent=money(expenses);
+  el("mPending").textContent=data.orders.filter(o=>!["Delivered","Cancelled"].includes(o.status)).length;
+  const recent=[...data.orders].reverse().slice(0,8);
+  showList("recentOrders",recent.map(o=>`<div class="item"><b>${esc(customerName(o.customerId))}</b><br>${esc(o.product)} · ${o.qty} · ${money(orderValue(o))}<br><span class="muted">${esc(o.date)} · ${esc(o.status)}</span></div>`).join(""),"अभी कोई ऑर्डर नहीं है।");
+  const options='<option value="">ग्राहक चुनें</option>'+data.customers.map(c=>`<option value="${c.id}">${esc(c.name)}${c.phone?" · "+esc(c.phone):""}</option>`).join("");
+  const oldO=val("oCustomer"),oldP=val("pCustomer");
+  el("oCustomer").innerHTML=options;el("pCustomer").innerHTML=options;
+  if(data.customers.some(c=>c.id===oldO))el("oCustomer").value=oldO;
+  if(data.customers.some(c=>c.id===oldP))el("pCustomer").value=oldP;
+  renderCustomers();renderOrders();renderPayments();renderExpenses();
+  el("systemInfo").textContent=`ग्राहक: ${data.customers.length} · ऑर्डर: ${data.orders.length} · भुगतान: ${data.payments.length} · खर्च: ${data.expenses.length}`;
+}
+
+el("exportBtn").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download="SKS_Business_Backup_"+today()+".json";a.click();URL.revokeObjectURL(url);
+});
+el("importBtn").addEventListener("click",()=>{
+  const file=el("importFile").files[0];
+  if(!file){alert("पहले JSON बैकअप फ़ाइल चुनें।");return;}
+  if(!confirm("यह इम्पोर्ट मौजूदा रिकॉर्ड बदल देगा। क्या आपने वर्तमान बैकअप डाउनलोड कर लिया है?"))return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const x=JSON.parse(reader.result);
+      if(!x||!Array.isArray(x.customers)||!Array.isArray(x.orders)||!Array.isArray(x.payments)||!Array.isArray(x.expenses))throw Error("गलत फॉर्मेट");
+      data=x;save();alert("बैकअप इम्पोर्ट हो गया।");
+    }catch(e){alert("बैकअप फ़ाइल सही नहीं है।");}
+  };
+  reader.readAsText(file);
+});
+
+el("oDate").value=today();el("pDate").value=today();el("eDate").value=today();
+render();
+</script>
+</body>
+</html>
