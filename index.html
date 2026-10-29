@@ -284,7 +284,8 @@ function renderAll(){
   renderExpenses();
   renderCustomerOptions();
   $("recentOrders").innerHTML=data.orders.slice(0,5).map(orderCard).join("") || "अभी कोई order नहीं है।";
-  function analyzeBusiness(){
+  
+function analyzeBusiness(){
   const box = $("aiAnalysis");
 
   if(!data.customers.length &&
