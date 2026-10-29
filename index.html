@@ -31,9 +31,9 @@ nav button{white-space:nowrap;flex-shrink:0}
 .item{border:1px solid #e0e6ef;padding:12px;border-radius:9px;margin:8px 0;overflow-wrap:anywhere}
 .item p{margin:5px 0}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.row>*{flex:1}
+.row>*{flex:1;min-width:0}
 .notice{padding:12px;background:#fff4d6;border-radius:8px;overflow-wrap:anywhere}
-#message{white-space:pre-wrap;overflow-wrap:anywhere}
+#appMessage,#authMessage{white-space:pre-wrap;overflow-wrap:anywhere}
 small{color:#65738a}
 hr{border:0;border-top:1px solid #e2e8f0;margin:16px 0}
 [hidden]{display:none!important}
@@ -41,502 +41,535 @@ hr{border:0;border-top:1px solid #e2e8f0;margin:16px 0}
 </head>
 <body>
 <header>
-  <h1>SKS Business OS</h1>
-  <p>Business Dashboard · Customers · Orders · AI Agent</p>
+<h1>SKS Business OS</h1>
+<p>Business Dashboard · Customers · Orders · AI Agent</p>
 </header>
 
 <main>
 <section id="authPanel" class="card">
-  <h2 id="authTitle">Login</h2>
-  <p class="muted">Apne account se business dashboard kholo.</p>
-  <form id="authForm">
-    <label>Email</label>
-    <input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
-    <label>Password</label>
-    <input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Kam se kam 6 characters">
-    <button id="authButton" type="submit">Login</button>
-    <button id="switchAuth" class="secondary" type="button">Naya account banayein</button>
-  </form>
-  <p id="authMessage" role="status"></p>
-  <p class="muted">Agar signup ke baad email confirmation maanga jaye, apne email mein aaya confirmation link kholo.</p>
+<h2 id="authTitle">Login</h2>
+<p class="muted">Apne account se business dashboard kholo.</p>
+<form id="authForm">
+<label>Email</label>
+<input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
+<label>Password</label>
+<input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Kam se kam 6 characters">
+<button id="authButton" type="submit">Login</button>
+<button id="switchAuth" class="secondary" type="button">Naya account banayein</button>
+</form>
+<p id="authMessage" role="status"></p>
+<p class="muted">Signup ke baad email confirmation maanga jaye to apna email check karo.</p>
 </section>
 
 <section id="appPanel" hidden>
-  <div class="card">
-    <div class="row">
-      <div>
-        <strong>Business Workspace</strong>
-        <p id="userEmail" class="muted"></p>
-      </div>
-      <button id="logoutBtn" class="secondary">Logout</button>
-    </div>
-    <p id="appMessage" role="status"></p>
-  </div>
+<div class="card">
+<div class="row">
+<div><strong>Business Workspace</strong><p id="userEmail" class="muted"></p></div>
+<button id="logoutBtn" class="secondary">Logout</button>
+</div>
+<p id="appMessage" role="status"></p>
+</div>
 
-  <nav aria-label="Business pages">
-    <button data-page="dashboard">Dashboard</button>
-    <button data-page="customers">Customers</button>
-    <button data-page="orders">Orders</button>
-    <button data-page="payments">Payments</button>
-    <button data-page="expenses">Expenses</button>
-    <button data-page="aiAgent">🤖 AI Agent</button>
-    <button data-page="backup">Backup</button>
-  </nav>
+<nav aria-label="Business pages">
+<button data-page="dashboard">Dashboard</button>
+<button data-page="customers">Customers</button>
+<button data-page="orders">Orders</button>
+<button data-page="payments">Payments</button>
+<button data-page="expenses">Expenses</button>
+<button data-page="aiAgent">🤖 AI Agent</button>
+<button data-page="backup">Backup</button>
+</nav>
 
-  <section id="dashboard" class="page active">
-    <div class="card">
-      <h2>Business Dashboard</h2>
-      <button id="refreshBtn" class="secondary">Refresh Data</button>
-      <div class="grid">
-        <div class="stat">Customers<strong id="customerCount">0</strong></div>
-        <div class="stat">Orders<strong id="orderCount">0</strong></div>
-        <div class="stat">Order Value<strong id="salesTotal">₹0</strong></div>
-        <div class="stat">Payments<strong id="paymentTotal">₹0</strong></div>
-        <div class="stat">Expenses<strong id="expenseTotal">₹0</strong></div>
-        <div class="stat">Pending Orders<strong id="pendingCount">0</strong></div>
-      </div>
-      <p class="muted">Order value, revenue aur profit alag cheezein hain. Yeh dashboard order value dikhata hai, guaranteed profit nahi.</p>
-    </div>
-    <div class="card">
-      <h3>Recent Orders</h3>
-      <div id="recentOrders"></div>
-    </div>
-  </section>
+<section id="dashboard" class="page active">
+<div class="card">
+<h2>Business Dashboard</h2>
+<button id="refreshBtn" class="secondary">Refresh Data</button>
+<div class="grid">
+<div class="stat">Customers<strong id="customerCount">0</strong></div>
+<div class="stat">Orders<strong id="orderCount">0</strong></div>
+<div class="stat">Order Value<strong id="salesTotal">₹0</strong></div>
+<div class="stat">Payments<strong id="paymentTotal">₹0</strong></div>
+<div class="stat">Expenses<strong id="expenseTotal">₹0</strong></div>
+<div class="stat">Pending Orders<strong id="pendingCount">0</strong></div>
+</div>
+<p class="muted">Order value aur profit alag hain. Yeh dashboard guaranteed profit nahi dikhata.</p>
+</div>
+<div class="card"><h3>Recent Orders</h3><div id="recentOrders"></div></div>
+</section>
 
-  <section id="customers" class="page">
-    <div class="card">
-      <h2>Add Customer</h2>
-      <form id="customerForm">
-        <label>Customer Name</label>
-        <input name="name" required maxlength="120" placeholder="Customer ka naam">
-        <label>Phone</label>
-        <input name="phone" maxlength="30" placeholder="Phone number">
-        <label>Address</label>
-        <textarea name="address" maxlength="300" placeholder="Address"></textarea>
-        <button type="submit">Save Customer</button>
-      </form>
-    </div>
-    <div class="card"><h3>Customer List</h3><div id="customerList"></div></div>
-  </section>
+<section id="customers" class="page">
+<div class="card">
+<h2>Add Customer</h2>
+<form id="customerForm">
+<label>Customer Name</label>
+<input name="name" required maxlength="120" placeholder="Customer ka naam">
+<label>Phone</label>
+<input name="phone" maxlength="30" placeholder="Phone number">
+<label>Address</label>
+<textarea name="address" maxlength="300" placeholder="Address"></textarea>
+<label>Opening Balance (₹)</label>
+<input name="opening_balance" type="number" step="0.01" value="0" required>
+<button type="submit">Save Customer</button>
+</form>
+</div>
+<div class="card"><h3>Customer List</h3><div id="customerList"></div></div>
+</section>
 
-  <section id="orders" class="page">
-    <div class="card">
-      <h2>Add Order</h2>
-      <form id="orderForm">
-        <label>Customer Name</label>
-        <input name="customer_name" required maxlength="120" placeholder="Customer ka naam">
-        <label>Product</label>
-        <select name="product_name">
-          <option>20L Jar</option><option>2L Bottle</option>
-          <option>1L Bottle</option><option>500ml Bottle</option>
-          <option>250ml Bottle</option><option>Other</option>
-        </select>
-        <div class="row">
-          <div><label>Quantity</label><input name="quantity" type="number" min="1" step="1" required value="1"></div>
-          <div><label>Price per unit (₹)</label><input name="unit_price" type="number" min="0" step="0.01" required value="0"></div>
-        </div>
-        <label>Order Date</label><input name="order_date" type="date" required>
-        <label>Status</label>
-        <select name="status"><option>Pending</option><option>Delivered</option><option>Cancelled</option></select>
-        <button type="submit">Save Order</button>
-      </form>
-    </div>
-    <div class="card"><h3>Order List</h3><div id="orderList"></div></div>
-  </section>
+<section id="orders" class="page">
+<div class="card">
+<h2>Add Order</h2>
+<form id="orderForm">
+<label>Customer</label>
+<select name="customer_id" id="orderCustomer" required></select>
+<label>Product</label>
+<select name="product_name">
+<option>20L Jar</option><option>2L Bottle</option>
+<option>1L Bottle</option><option>500ml Bottle</option>
+<option>250ml Bottle</option><option>Other</option>
+</select>
+<div class="row">
+<div><label>Quantity</label><input name="quantity" type="number" min="1" step="1" required value="1"></div>
+<div><label>Price per unit (₹)</label><input name="unit_price" type="number" min="0" step="0.01" required value="0"></div>
+</div>
+<label>Order Date</label><input name="order_date" type="date" required>
+<label>Status</label>
+<select name="status"><option>Pending</option><option>Delivered</option><option>Cancelled</option></select>
+<label>Notes (optional)</label><input name="notes" maxlength="250" placeholder="Extra details">
+<button type="submit">Save Order</button>
+</form>
+<p class="muted">Order add karne se pehle Customer section mein customer save karo.</p>
+</div>
+<div class="card"><h3>Order List</h3><div id="orderList"></div></div>
+</section>
 
-  <section id="payments" class="page">
-    <div class="card">
-      <h2>Record Payment</h2>
-      <form id="paymentForm">
-        <label>Customer Name</label><input name="customer_name" required maxlength="120">
-        <label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
-        <label>Payment Date</label><input name="payment_date" type="date" required>
-        <label>Note</label><input name="note" maxlength="250" placeholder="Cash, UPI, etc.">
-        <button type="submit">Save Payment</button>
-      </form>
-    </div>
-    <div class="card"><h3>Payment History</h3><div id="paymentList"></div></div>
-  </section>
+<section id="payments" class="page">
+<div class="card">
+<h2>Record Payment</h2>
+<form id="paymentForm">
+<label>Customer</label>
+<select name="customer_id" id="paymentCustomer" required></select>
+<label>Related Order (optional)</label>
+<select name="order_id" id="paymentOrder"><option value="">Not linked to an order</option></select>
+<label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
+<label>Payment Method</label>
+<select name="payment_method" required>
+<option value="Cash">Cash</option><option value="UPI">UPI</option>
+<option value="Bank Transfer">Bank Transfer</option><option value="Other">Other</option>
+</select>
+<label>Payment Date</label><input name="payment_date" type="date" required>
+<label>Notes</label><input name="notes" maxlength="250" placeholder="Optional details">
+<button type="submit">Save Payment</button>
+</form>
+</div>
+<div class="card"><h3>Payment History</h3><div id="paymentList"></div></div>
+</section>
 
-  <section id="expenses" class="page">
-    <div class="card">
-      <h2>Add Expense</h2>
-      <form id="expenseForm">
-        <label>Expense Name</label><input name="title" required maxlength="120" placeholder="Transport, packaging, etc.">
-        <label>Category</label>
-        <select name="category"><option>Transport</option><option>Packaging</option><option>Electricity</option><option>Materials</option><option>Salary</option><option>Other</option></select>
-        <label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
-        <label>Date</label><input name="expense_date" type="date" required>
-        <button type="submit">Save Expense</button>
-      </form>
-    </div>
-    <div class="card"><h3>Expense History</h3><div id="expenseList"></div></div>
-  </section>
+<section id="expenses" class="page">
+<div class="card">
+<h2>Add Expense</h2>
+<form id="expenseForm">
+<label>Expense Name</label><input name="description" required maxlength="120" placeholder="Transport, packaging, etc.">
+<label>Category</label>
+<select name="category"><option>Transport</option><option>Packaging</option><option>Electricity</option><option>Materials</option><option>Salary</option><option>Other</option></select>
+<label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
+<label>Date</label><input name="expense_date" type="date" required>
+<button type="submit">Save Expense</button>
+</form>
+</div>
+<div class="card"><h3>Expense History</h3><div id="expenseList"></div></div>
+</section>
 
-  <section id="aiAgent" class="page">
-    <div class="card">
-      <h2>🤖 SKS AI Business Agent</h2>
-      <p class="muted">Apne recorded business data ka Hindi mein analysis aur practical suggestions pao.</p>
-      <button id="analyzeBtn">Analyze My Business</button>
-      <div id="aiAnalysis" aria-live="polite"><p class="muted">Analysis ke liye button dabao.</p></div>
-      <hr>
-      <p class="muted">Yeh version local rules aur tumhare saved data par analysis karta hai. Yeh generative AI model nahi hai aur apne aap orders place ya payments nahi karta.</p>
-    </div>
-  </section>
+<section id="aiAgent" class="page">
+<div class="card">
+<h2>🤖 SKS AI Business Agent</h2>
+<p class="muted">Saved business data ka analysis aur suggestions pao.</p>
+<button id="analyzeBtn">Analyze My Business</button>
+<div id="aiAnalysis" aria-live="polite"><p class="muted">Analysis ke liye button dabao.</p></div>
+<hr>
+<p class="muted">Yeh version local rules par chalta hai, generative AI nahi hai. Yeh khud orders place ya payments nahi karta.</p>
+</div>
+</section>
 
-  <section id="backup" class="page">
-    <div class="card">
-      <h2>Backup & Export</h2>
-      <p>Apne business records ki JSON file download karo aur safe jagah par rakho.</p>
-      <button id="backupBtn">Download JSON Backup</button>
-      <p class="muted">Yeh backup download karta hai; data ko automatically restore nahi karta.</p>
-    </div>
-  </section>
+<section id="backup" class="page">
+<div class="card">
+<h2>Backup & Export</h2>
+<p>Apne records ki JSON backup file download karo.</p>
+<button id="backupBtn">Download JSON Backup</button>
+<p class="muted">Backup file automatically data restore nahi karti. File ko safe rakho.</p>
+</div>
+</section>
 </section>
 </main>
 
 <script>
 "use strict";
 
-/* Apne naye Supabase project ki details yahan bharo. */
-const SUPABASE_URL = "https://vwusylwuueecbbtwlnlm.supabase.co"
+const SUPABASE_URL = "https://vwusylwuueecbbtwlnlm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UqKfVeI-Fqo1es6uAy4DWA_4H0mGMCZ";
 
 const $ = id => document.getElementById(id);
-const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, c => ({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
 }[c]));
-const money = value => new Intl.NumberFormat("en-IN", {
-  style:"currency", currency:"INR", maximumFractionDigits:2
-}).format(Number(value) || 0);
-const today = () => new Date().toLocaleDateString("en-CA");
+const money = value => new Intl.NumberFormat("en-IN",{
+style:"currency",currency:"INR",maximumFractionDigits:2
+}).format(Number(value)||0);
+const today = () => {
+const d=new Date();
+return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
 
-let db = null;
-let currentUser = null;
-let authMode = "login";
-let data = {customers:[], orders:[], payments:[], expenses:[]};
-let busy = false;
+let db=null;
+let currentUser=null;
+let authMode="login";
+let busy=false;
+let data={customers:[],orders:[],payments:[],expenses:[]};
 
-function setAuthMessage(message, isError=false) {
-  $("authMessage").textContent = message;
-  $("authMessage").style.color = isError ? "#b42318" : "#176b39";
+function setAuthMessage(message,error=false){
+$("authMessage").textContent=message;
+$("authMessage").style.color=error?"#b42318":"#176b39";
 }
-function setAppMessage(message, isError=false) {
-  $("appMessage").textContent = message;
-  $("appMessage").style.color = isError ? "#b42318" : "#176b39";
+function setAppMessage(message,error=false){
+$("appMessage").textContent=message;
+$("appMessage").style.color=error?"#b42318":"#176b39";
 }
-function showAuth() {
-  $("authPanel").hidden = false;
-  $("appPanel").hidden = true;
+function showAuth(){
+$("authPanel").hidden=false;
+$("appPanel").hidden=true;
 }
-function showApp() {
-  $("authPanel").hidden = true;
-  $("appPanel").hidden = false;
-  $("userEmail").textContent = currentUser?.email || "";
+function showApp(){
+$("authPanel").hidden=true;
+$("appPanel").hidden=false;
+$("userEmail").textContent=currentUser?.email||"";
 }
-function getForm(form) {
-  return Object.fromEntries(new FormData(form).entries());
+function getForm(form){
+return Object.fromEntries(new FormData(form).entries());
 }
-function setDefaultDates() {
-  document.querySelectorAll('input[type="date"]').forEach(el => {
-    if (!el.value) el.value = today();
-  });
+function setDefaultDates(){
+document.querySelectorAll('input[type="date"]').forEach(el=>{
+if(!el.value)el.value=today();
+});
 }
-function orderValue(o) {
-  return Number(o.quantity || 0) * Number(o.unit_price || 0);
+function orderValue(o){
+return Number(o.total_amount ?? (Number(o.quantity||0)*Number(o.unit_price||0)))||0;
 }
-function statusText(s) {
-  return s === "Delivered" ? "Delivered" : s === "Cancelled" ? "Cancelled" : "Pending";
+function customerName(id){
+return data.customers.find(c=>c.id===id)?.name || "Customer not found";
 }
-function itemHTML(title, details, id, table, statusButtons=false) {
-  return `<div class="item">
-    <strong>${escapeHTML(title)}</strong>
-    <p>${details}</p>
-    ${statusButtons ? `
-      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Pending">Pending</button>
-      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Delivered">Delivered</button>
-      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Cancelled">Cancelled</button>` : ""}
-    <button class="danger" data-action="delete" data-id="${escapeHTML(id)}" data-table="${table}">Delete</button>
-  </div>`;
+function statusText(s){
+return s==="Delivered"?"Delivered":s==="Cancelled"?"Cancelled":"Pending";
 }
-function renderAll() {
-  $("customerCount").textContent = data.customers.length;
-  $("orderCount").textContent = data.orders.length;
-  const validOrders = data.orders.filter(o => o.status !== "Cancelled");
-  $("salesTotal").textContent = money(validOrders.reduce((s,o)=>s+orderValue(o),0));
-  $("paymentTotal").textContent = money(data.payments.reduce((s,p)=>s+Number(p.amount||0),0));
-  $("expenseTotal").textContent = money(data.expenses.reduce((s,e)=>s+Number(e.amount||0),0));
-  $("pendingCount").textContent = data.orders.filter(o=>o.status==="Pending").length;
+function itemHTML(title,details,id,table,statusButtons=false){
+return `<div class="item">
+<strong>${escapeHTML(title)}</strong>
+<p>${details}</p>
+${statusButtons?`
+<button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Pending">Pending</button>
+<button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Delivered">Delivered</button>
+<button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Cancelled">Cancelled</button>`:""}
+<button class="danger" data-action="delete" data-id="${escapeHTML(id)}" data-table="${table}">Delete</button>
+</div>`;
+}
+function fillCustomerDropdowns(){
+const opts=data.customers.map(c=>
+`<option value="${escapeHTML(c.id)}">${escapeHTML(c.name)}${c.phone?" — "+escapeHTML(c.phone):""}</option>`
+).join("");
+for(const id of ["orderCustomer","paymentCustomer"]){
+const el=$(id),old=el.value;
+el.innerHTML=opts||'<option value="">Pehle customer add karo</option>';
+if(data.customers.some(c=>c.id===old))el.value=old;
+el.disabled=data.customers.length===0;
+}
+const orderEl=$("paymentOrder"),oldOrder=orderEl.value;
+orderEl.innerHTML='<option value="">Not linked to an order</option>'+
+data.orders.map(o=>`<option value="${escapeHTML(o.id)}">${escapeHTML(customerName(o.customer_id))} — ${escapeHTML(o.product_name)} — ${escapeHTML(o.order_date)}</option>`).join("");
+if(data.orders.some(o=>o.id===oldOrder))orderEl.value=oldOrder;
+}
+function renderAll(){
+fillCustomerDropdowns();
 
-  $("customerList").innerHTML = data.customers.length ? data.customers.map(c =>
-    itemHTML(c.name, `Phone: ${escapeHTML(c.phone || "—")}<br>Address: ${escapeHTML(c.address || "—")}`, c.id, "customers")
-  ).join("") : "<p class='muted'>Abhi koi customer nahi hai.</p>";
+$("customerCount").textContent=data.customers.length;
+$("orderCount").textContent=data.orders.length;
+const validOrders=data.orders.filter(o=>o.status!=="Cancelled");
+$("salesTotal").textContent=money(validOrders.reduce((s,o)=>s+orderValue(o),0));
+$("paymentTotal").textContent=money(data.payments.reduce((s,p)=>s+Number(p.amount||0),0));
+$("expenseTotal").textContent=money(data.expenses.reduce((s,x)=>s+Number(x.amount||0),0));
+$("pendingCount").textContent=data.orders.filter(o=>o.status==="Pending").length;
 
-  const sortedOrders = [...data.orders].sort((a,b)=>(b.order_date||"").localeCompare(a.order_date||""));
-  $("orderList").innerHTML = sortedOrders.length ? sortedOrders.map(o =>
-    itemHTML(`${o.customer_name} — ${o.product_name}`,
-      `Date: ${escapeHTML(o.order_date)}<br>Quantity: ${escapeHTML(o.quantity)} × ${money(o.unit_price)} = <strong>${money(orderValue(o))}</strong><br>Status: ${escapeHTML(statusText(o.status))}`,
-      o.id, "orders", true)
-  ).join("") : "<p class='muted'>Abhi koi order nahi hai.</p>";
+$("customerList").innerHTML=data.customers.length?data.customers.map(c=>
+itemHTML(c.name,
+`Phone: ${escapeHTML(c.phone||"—")}<br>Address: ${escapeHTML(c.address||"—")}<br>Opening balance: ${money(c.opening_balance)}`,
+c.id,"customers")
+).join(""):"<p class='muted'>Abhi koi customer nahi hai.</p>";
 
-  $("recentOrders").innerHTML = sortedOrders.slice(0,5).map(o =>
-    `<div class="item"><strong>${escapeHTML(o.customer_name)}</strong>
-    <p>${escapeHTML(o.product_name)} · ${escapeHTML(o.quantity)} units · ${money(orderValue(o))}</p>
-    <small>${escapeHTML(o.order_date)} · ${escapeHTML(statusText(o.status))}</small></div>`
-  ).join("") || "<p class='muted'>Orders add karne par yahan dikhengi.</p>";
+const sortedOrders=[...data.orders].sort((a,b)=>(b.order_date||"").localeCompare(a.order_date||""));
+$("orderList").innerHTML=sortedOrders.length?sortedOrders.map(o=>
+itemHTML(`${customerName(o.customer_id)} — ${o.product_name}`,
+`Date: ${escapeHTML(o.order_date)}<br>Quantity: ${escapeHTML(o.quantity)} × ${money(o.unit_price)} = <strong>${money(orderValue(o))}</strong><br>Status: ${escapeHTML(statusText(o.status))}<br>Notes: ${escapeHTML(o.notes||"—")}`,
+o.id,"orders",true)
+).join(""):"<p class='muted'>Abhi koi order nahi hai.</p>";
 
-  $("paymentList").innerHTML = data.payments.length ? [...data.payments].sort((a,b)=>(b.payment_date||"").localeCompare(a.payment_date||"")).map(p =>
-    itemHTML(`${p.customer_name} — ${money(p.amount)}`,
-      `Date: ${escapeHTML(p.payment_date)}<br>Note: ${escapeHTML(p.note || "—")}`, p.id, "payments")
-  ).join("") : "<p class='muted'>Abhi koi payment nahi hai.</p>";
+$("recentOrders").innerHTML=sortedOrders.slice(0,5).map(o=>
+`<div class="item"><strong>${escapeHTML(customerName(o.customer_id))}</strong>
+<p>${escapeHTML(o.product_name)} · ${escapeHTML(o.quantity)} units · ${money(orderValue(o))}</p>
+<small>${escapeHTML(o.order_date)} · ${escapeHTML(statusText(o.status))}</small></div>`
+).join("")||"<p class='muted'>Orders add karne par yahan dikhengi.</p>";
 
-  $("expenseList").innerHTML = data.expenses.length ? [...data.expenses].sort((a,b)=>(b.expense_date||"").localeCompare(a.expense_date||"")).map(e =>
-    itemHTML(`${e.title} — ${money(e.amount)}`,
-      `Category: ${escapeHTML(e.category || "Other")}<br>Date: ${escapeHTML(e.expense_date)}`, e.id, "expenses")
-  ).join("") : "<p class='muted'>Abhi koi expense nahi hai.</p>";
-}
+const sortedPayments=[...data.payments].sort((a,b)=>(b.payment_date||"").localeCompare(a.payment_date||""));
+$("paymentList").innerHTML=sortedPayments.length?sortedPayments.map(p=>
+itemHTML(`${customerName(p.customer_id)} — ${money(p.amount)}`,
+`Date: ${escapeHTML(p.payment_date)}<br>Method: ${escapeHTML(p.payment_method)}<br>Order: ${escapeHTML(data.orders.find(o=>o.id===p.order_id)?.product_name||"Not linked")}<br>Notes: ${escapeHTML(p.notes||"—")}`,
+p.id,"payments")
+).join(""):"<p class='muted'>Abhi koi payment nahi hai.</p>";
 
-async function loadCloudData() {
-  if (!db || !currentUser) return;
-  setAppMessage("Data load ho raha hai...");
-  const tables = ["customers","orders","payments","expenses"];
-  const results = await Promise.all(tables.map(table =>
-    db.from(table).select("*").order("created_at",{ascending:false}).limit(1000)
-  ));
-  const failed = results.find(r => r.error);
-  if (failed) {
-    setAppMessage("Data load nahi hua: " + failed.error.message, true);
-    return;
-  }
-  data = {
-    customers:results[0].data || [],
-    orders:results[1].data || [],
-    payments:results[2].data || [],
-    expenses:results[3].data || []
-  };
-  renderAll();
-  setAppMessage("Data successfully load ho gaya.");
-}
-
-async function saveRecord(table, values, form) {
-  if (!currentUser || busy) return;
-  busy = true;
-  const submit = form.querySelector('button[type="submit"]');
-  if (submit) submit.disabled = true;
-  try {
-    const result = await db.from(table).insert({
-      ...values, user_id:currentUser.id
-    });
-    if (result.error) throw result.error;
-    form.reset();
-    setDefaultDates();
-    await loadCloudData();
-    setAppMessage("Record save ho gaya.");
-  } catch (e) {
-    setAppMessage("Save nahi hua: " + (e.message || "Unknown error"), true);
-  } finally {
-    busy = false;
-    if (submit) submit.disabled = false;
-  }
+const sortedExpenses=[...data.expenses].sort((a,b)=>(b.expense_date||"").localeCompare(a.expense_date||""));
+$("expenseList").innerHTML=sortedExpenses.length?sortedExpenses.map(x=>
+itemHTML(`${x.description} — ${money(x.amount)}`,
+`Category: ${escapeHTML(x.category||"Other")}<br>Date: ${escapeHTML(x.expense_date)}`,
+x.id,"expenses")
+).join(""):"<p class='muted'>Abhi koi expense nahi hai.</p>";
 }
 
-$("authForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  if (!db) {
-    setAuthMessage("Supabase configuration missing hai. URL aur publishable key check karo.", true);
-    return;
-  }
-  const email = $("email").value.trim();
-  const password = $("password").value;
-  const button = $("authButton");
-  button.disabled = true;
-  setAuthMessage(authMode === "login" ? "Login ho raha hai..." : "Account ban raha hai...");
-  try {
-    let result;
-    if (authMode === "login") {
-      result = await db.auth.signInWithPassword({email,password});
-    } else {
-      result = await db.auth.signUp({email,password});
-    }
-    if (result.error) throw result.error;
-    if (authMode === "signup" && !result.data.session) {
-      setAuthMessage("Account request ho gayi. Apna email confirmation link kholo, phir login karo.");
-    } else {
-      setAuthMessage(authMode === "login" ? "Login successful." : "Account created.");
-    }
-  } catch (e) {
-    setAuthMessage("Login/signup fail hua: " + (e.message || "Unknown error"), true);
-  } finally {
-    button.disabled = false;
-  }
+async function loadCloudData(){
+if(!db||!currentUser)return;
+setAppMessage("Data load ho raha hai...");
+const tables=["customers","orders","payments","expenses"];
+const results=await Promise.all(tables.map(table=>
+db.from(table).select("*").order("created_at",{ascending:false}).limit(1000)
+));
+const failed=results.find(r=>r.error);
+if(failed){
+setAppMessage("Data load nahi hua: "+failed.error.message,true);
+return;
+}
+data={
+customers:results[0].data||[],
+orders:results[1].data||[],
+payments:results[2].data||[],
+expenses:results[3].data||[]
+};
+renderAll();
+setAppMessage("Data successfully load ho gaya.");
+}
+
+async function saveRecord(table,values,form){
+if(!currentUser||busy)return;
+busy=true;
+const submit=form.querySelector('button[type="submit"]');
+if(submit)submit.disabled=true;
+try{
+const {error}=await db.from(table).insert({...values,user_id:currentUser.id});
+if(error)throw error;
+form.reset();
+setDefaultDates();
+await loadCloudData();
+setAppMessage("Record save ho gaya.");
+}catch(e){
+setAppMessage("Save nahi hua: "+(e.message||"Unknown error"),true);
+}finally{
+busy=false;
+if(submit)submit.disabled=false;
+}
+}
+
+$("authForm").addEventListener("submit",async e=>{
+e.preventDefault();
+if(!db){setAuthMessage("Supabase setup check karo.",true);return;}
+const email=$("email").value.trim(),password=$("password").value;
+const button=$("authButton");
+button.disabled=true;
+setAuthMessage(authMode==="login"?"Login ho raha hai...":"Account ban raha hai...");
+try{
+const result=authMode==="login"
+?await db.auth.signInWithPassword({email,password})
+:await db.auth.signUp({email,password});
+if(result.error)throw result.error;
+if(authMode==="signup"&&!result.data.session){
+setAuthMessage("Account request ho gayi. Email confirmation karo, phir login karo.");
+}else{
+setAuthMessage(authMode==="login"?"Login successful.":"Account created.");
+}
+}catch(e){
+setAuthMessage("Login/signup fail hua: "+e.message,true);
+}finally{button.disabled=false;}
 });
 
-$("switchAuth").addEventListener("click", () => {
-  authMode = authMode === "login" ? "signup" : "login";
-  $("authTitle").textContent = authMode === "login" ? "Login" : "Create Account";
-  $("authButton").textContent = authMode === "login" ? "Login" : "Sign Up";
-  $("switchAuth").textContent = authMode === "login" ? "Naya account banayein" : "Pehle se account hai? Login";
-  $("password").autocomplete = authMode === "login" ? "current-password" : "new-password";
-  setAuthMessage("");
+$("switchAuth").addEventListener("click",()=>{
+authMode=authMode==="login"?"signup":"login";
+$("authTitle").textContent=authMode==="login"?"Login":"Create Account";
+$("authButton").textContent=authMode==="login"?"Login":"Sign Up";
+$("switchAuth").textContent=authMode==="login"?"Naya account banayein":"Pehle se account hai? Login";
+$("password").autocomplete=authMode==="login"?"current-password":"new-password";
+setAuthMessage("");
 });
 
-$("logoutBtn").addEventListener("click", async () => {
-  const {error} = await db.auth.signOut();
-  if (error) setAppMessage("Logout fail hua: " + error.message, true);
+$("logoutBtn").addEventListener("click",async()=>{
+const {error}=await db.auth.signOut();
+if(error)setAppMessage("Logout fail hua: "+error.message,true);
 });
 
-document.querySelectorAll("nav [data-page]").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    $(button.dataset.page).classList.add("active");
-  });
+document.querySelectorAll("nav [data-page]").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+$(button.dataset.page).classList.add("active");
+});
 });
 
-$("customerForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const f = e.currentTarget, v = getForm(f);
-  await saveRecord("customers", {
-    name:v.name.trim(), phone:v.phone.trim(), address:v.address.trim()
-  }, f);
-});
-$("orderForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const f=e.currentTarget, v=getForm(f);
-  await saveRecord("orders", {
-    customer_name:v.customer_name.trim(), product_name:v.product_name,
-    quantity:Number(v.quantity), unit_price:Number(v.unit_price),
-    status:v.status, order_date:v.order_date
-  },f);
-});
-$("paymentForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const f=e.currentTarget,v=getForm(f);
-  await saveRecord("payments", {
-    customer_name:v.customer_name.trim(), amount:Number(v.amount),
-    payment_date:v.payment_date, note:v.note.trim()
-  },f);
-});
-$("expenseForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const f=e.currentTarget,v=getForm(f);
-  await saveRecord("expenses", {
-    title:v.title.trim(), category:v.category,
-    amount:Number(v.amount), expense_date:v.expense_date
-  },f);
+$("customerForm").addEventListener("submit",async e=>{
+e.preventDefault();
+const f=e.currentTarget,v=getForm(f);
+await saveRecord("customers",{
+name:v.name.trim(),phone:v.phone.trim()||null,
+address:v.address.trim()||null,
+opening_balance:Number(v.opening_balance)
+},f);
 });
 
-document.addEventListener("click", async e => {
-  const button = e.target.closest("button[data-action]");
-  if (!button || !currentUser || busy) return;
-  const id=button.dataset.id;
-  const table=button.dataset.table;
-  if (button.dataset.action === "delete") {
-    if (!["customers","orders","payments","expenses"].includes(table)) return;
-    if (!confirm("Kya tum is record ko delete karna chahte ho?")) return;
-    busy=true;
-    try {
-      const {error}=await db.from(table).delete().eq("id",id).eq("user_id",currentUser.id);
-      if (error) throw error;
-      await loadCloudData();
-      setAppMessage("Record delete ho gaya.");
-    } catch(err) {
-      setAppMessage("Delete fail hua: "+err.message,true);
-    } finally { busy=false; }
-  } else if (button.dataset.action === "status") {
-    busy=true;
-    try {
-      const {error}=await db.from("orders").update({status:button.dataset.status})
-        .eq("id",id).eq("user_id",currentUser.id);
-      if(error) throw error;
-      await loadCloudData();
-    } catch(err) {
-      setAppMessage("Status update nahi hua: "+err.message,true);
-    } finally { busy=false; }
-  }
-});
-
-$("refreshBtn").addEventListener("click", loadCloudData);
-
-$("analyzeBtn").addEventListener("click", () => {
-  const box=$("aiAnalysis");
-  const valid=data.orders.filter(o=>o.status!=="Cancelled");
-  const sales=valid.reduce((s,o)=>s+orderValue(o),0);
-  const paid=data.payments.reduce((s,p)=>s+Number(p.amount||0),0);
-  const expenses=data.expenses.reduce((s,x)=>s+Number(x.amount||0),0);
-  const pending=data.orders.filter(o=>o.status==="Pending");
-  const pendingValue=pending.reduce((s,o)=>s+orderValue(o),0);
-  const products={};
-  valid.forEach(o=>{
-    products[o.product_name]=(products[o.product_name]||0)+Number(o.quantity||0);
-  });
-  const top=Object.entries(products).sort((a,b)=>b[1]-a[1])[0];
-  const lines=[
-    `Customers: ${data.customers.length}`,
-    `Non-cancelled order value: ${money(sales)}`,
-    `Recorded payments: ${money(paid)}`,
-    `Recorded expenses: ${money(expenses)}`,
-    `Pending orders: ${pending.length} (${money(pendingValue)})`
-  ];
-  if(top) lines.push(`Quantity ke hisaab se top product: ${top[0]} (${top[1]} units)`);
-  const tips=[];
-  if(pending.length) tips.push(`${pending.length} pending orders ki delivery aur status check karo.`);
-  else tips.push("Koi pending order nahi hai. Repeat customers aur naye orders par dhyan do.");
-  if(data.customers.length) tips.push("Customer details aur payment records ko regularly update karo.");
-  if(expenses>0) tips.push("Transport, packaging aur electricity expenses ko categories ke hisaab se compare karo.");
-  if(!data.orders.length) tips.push("Sales report ke liye real orders record karna shuru karo.");
-  box.innerHTML=`<hr><h3>Business Report</h3>${lines.map(x=>`<p>${escapeHTML(x)}</p>`).join("")}<h3>Suggestions</h3><ul>${tips.map(x=>`<li>${escapeHTML(x)}</li>`).join("")}</ul><p class="muted">Important: Order value profit nahi hai. Payment total ko order value se minus karke outstanding balance mat mano, kyunki payments order-specific nahi hain. Accurate profit ke liye production/purchase cost aur doosre kharche bhi chahiye.</p>`;
-});
-
-$("backupBtn").addEventListener("click", () => {
-  if (!currentUser) return;
-  const payload = {
-    exported_at:new Date().toISOString(),
-    customers:data.customers, orders:data.orders,
-    payments:data.payments, expenses:data.expenses
-  };
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="SKS-Business-Backup.json"; a.click();
-  URL.revokeObjectURL(url);
-});
-
-async function startApp() {
-  if (!SUPABASE_URL.startsWith("https://") ||
-      SUPABASE_URL.includes("PASTE_") ||
-      SUPABASE_PUBLISHABLE_KEY.includes("PASTE_") ||
-      !SUPABASE_PUBLISHABLE_KEY) {
-    setAuthMessage("Setup baaki hai: code mein apna Supabase Project URL aur publishable key bharo.", true);
-    return;
-  }
-  try {
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-    const {data:sessionData,error}=await db.auth.getSession();
-    if (error) throw error;
-    currentUser=sessionData.session?.user || null;
-    if(currentUser) {
-      showApp();
-      await loadCloudData();
-    } else {
-      showAuth();
-    }
-    db.auth.onAuthStateChange((_event,session) => {
-      setTimeout(async () => {
-        currentUser=session?.user || null;
-        if(currentUser) {
-          showApp();
-          await loadCloudData();
-        } else {
-          data={customers:[],orders:[],payments:[],expenses:[]};
-          showAuth();
-        }
-      },0);
-    });
-  } catch(e) {
-    showAuth();
-    setAuthMessage("App initialize nahi hua: "+(e.message || "Configuration check karo."),true);
-  }
+$("orderForm").addEventListener("submit",async e=>{
+e.preventDefault();
+const f=e.currentTarget,v=getForm(f);
+if(!v.customer_id){setAppMessage("Pehle customer add karke select karo.",true);return;}
+const quantity=Number(v.quantity),unitPrice=Number(v.unit_price);
+if(quantity<1||unitPrice<0||!Number.isFinite(quantity)||!Number.isFinite(unitPrice)){
+setAppMessage("Quantity aur price check karo.",true);return;
 }
+await saveRecord("orders",{
+customer_id:v.customer_id,
+product_name:v.product_name,
+quantity,unit_price,
+total_amount:quantity*unitPrice,
+status:v.status,
+order_date:v.order_date,
+notes:v.notes.trim()||null
+},f);
+});
+
+$("paymentForm").addEventListener("submit",async e=>{
+e.preventDefault();
+const f=e.currentTarget,v=getForm(f);
+if(!v.customer_id){setAppMessage("Pehle customer add karke select karo.",true);return;}
+const amount=Number(v.amount);
+if(!Number.isFinite(amount)||amount<=0){setAppMessage("Payment amount sahi bharo.",true);return;}
+if(v.order_id){
+const selectedOrder=data.orders.find(o=>o.id===v.order_id);
+if(!selectedOrder||selectedOrder.customer_id!==v.customer_id){
+setAppMessage("Selected order isi customer ka hona chahiye.",true);return;
+}
+}
+await saveRecord("payments",{
+customer_id:v.customer_id,
+order_id:v.order_id||null,
+amount,
+payment_method:v.payment_method,
+payment_date:v.payment_date,
+notes:v.notes.trim()||null
+},f);
+});
+
+$("expenseForm").addEventListener("submit",async e=>{
+e.preventDefault();
+const f=e.currentTarget,v=getForm(f);
+await saveRecord("expenses",{
+description:v.description.trim(),
+category:v.category,
+amount:Number(v.amount),
+expense_date:v.expense_date
+},f);
+});
+
+document.addEventListener("click",async e=>{
+const button=e.target.closest("button[data-action]");
+if(!button||!currentUser||busy)return;
+const id=button.dataset.id,table=button.dataset.table;
+if(button.dataset.action==="delete"){
+if(!["customers","orders","payments","expenses"].includes(table))return;
+if(!confirm("Kya tum is record ko delete karna chahte ho?"))return;
+busy=true;
+try{
+const {error}=await db.from(table).delete().eq("id",id).eq("user_id",currentUser.id);
+if(error)throw error;
+await loadCloudData();
+setAppMessage("Record delete ho gaya.");
+}catch(err){
+setAppMessage("Delete fail hua: "+err.message,true);
+}finally{busy=false;}
+}else if(button.dataset.action==="status"){
+busy=true;
+try{
+const {error}=await db.from("orders").update({status:button.dataset.status})
+.eq("id",id).eq("user_id",currentUser.id);
+if(error)throw error;
+await loadCloudData();
+}catch(err){
+setAppMessage("Status update nahi hua: "+err.message,true);
+}finally{busy=false;}
+}
+});
+
+$("refreshBtn").addEventListener("click",loadCloudData);
+
+$("analyzeBtn").addEventListener("click",()=>{
+const valid=data.orders.filter(o=>o.status!=="Cancelled");
+const sales=valid.reduce((s,o)=>s+orderValue(o),0);
+const paid=data.payments.reduce((s,p)=>s+Number(p.amount||0),0);
+const expenses=data.expenses.reduce((s,x)=>s+Number(x.amount||0),0);
+const pending=data.orders.filter(o=>o.status==="Pending");
+const pendingValue=pending.reduce((s,o)=>s+orderValue(o),0);
+const products={};
+valid.forEach(o=>products[o.product_name]=(products[o.product_name]||0)+Number(o.quantity||0));
+const top=Object.entries(products).sort((a,b)=>b[1]-a[1])[0];
+const lines=[
+`Customers: ${data.customers.length}`,
+`Non-cancelled order value: ${money(sales)}`,
+`Recorded payments: ${money(paid)}`,
+`Recorded expenses: ${money(expenses)}`,
+`Pending orders: ${pending.length} (${money(pendingValue)})`
+];
+if(top)lines.push(`Top product by quantity: ${top[0]} (${top[1]} units)`);
+const tips=[];
+tips.push(pending.length?`${pending.length} pending orders ki delivery check karo.`:"Koi pending order nahi hai. Repeat customers par dhyan do.");
+if(data.customers.length)tips.push("Customer details aur payments regularly update karo.");
+if(expenses>0)tips.push("Transport, packaging aur electricity expenses compare karo.");
+if(!data.orders.length)tips.push("Sales report ke liye orders record karna shuru karo.");
+$("aiAnalysis").innerHTML=`<hr><h3>Business Report</h3>${lines.map(x=>`<p>${escapeHTML(x)}</p>`).join("")}<h3>Suggestions</h3><ul>${tips.map(x=>`<li>${escapeHTML(x)}</li>`).join("")}</ul><p class="muted">Order value profit nahi hai. Accurate profit ke liye product cost, production aur doosre kharche bhi record karo. Payments ka total apne aap outstanding balance nahi batata.</p>`;
+});
+
+$("backupBtn").addEventListener("click",()=>{
+if(!currentUser)return;
+const payload={exported_at:new Date().toISOString(),customers:data.customers,orders:data.orders,payments:data.payments,expenses:data.expenses};
+const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;a.download="SKS-Business-Backup.json";a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+
+async function startApp(){
+try{
+if(!SUPABASE_URL.startsWith("https://")||!SUPABASE_PUBLISHABLE_KEY){
+setAuthMessage("Supabase URL aur publishable key check karo.",true);return;
+}
+db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const {data:sessionData,error}=await db.auth.getSession();
+if(error)throw error;
+currentUser=sessionData.session?.user||null;
+if(currentUser){showApp();await loadCloudData();}else{showAuth();}
+db.auth.onAuthStateChange((_event,session)=>{
+setTimeout(async()=>{
+currentUser=session?.user||null;
+if(currentUser){showApp();await loadCloudData();}
+else{
+data={customers:[],orders:[],payments:[],expenses:[]};
+showAuth();
+}
+},0);
+});
+}catch(e){
+showAuth();
+setAuthMessage("App initialize nahi hua: "+(e.message||"Configuration check karo."),true);
+}
+}
+
 setDefaultDates();
 startApp();
 </script>
