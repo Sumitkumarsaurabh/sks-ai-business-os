@@ -4,641 +4,541 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SKS AI Business OS</title>
+<title>SKS Business OS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f3f6fb;color:#172033;font-family:Arial,sans-serif}
-header{background:#102b50;color:white;padding:20px 16px}
-header h2{margin:0 0 6px}
-header p{margin:0;color:#d6e4f5}
-.wrap{max-width:1000px;margin:auto;padding:14px}
-.card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #1527440c}
-h3{margin-top:0}
-input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ccd5e2;border-radius:8px;font-size:15px;background:white}
-button{border:0;border-radius:8px;background:#1756a9;color:white;padding:11px 14px;font-size:14px;font-weight:bold;margin:4px 3px 4px 0}
-button.secondary{background:#e7edf6;color:#172033}
+header{background:#102b50;color:white;padding:18px}
+header h1{margin:0 0 6px;font-size:23px}
+header p{margin:0;color:#dbeafe}
+main{max-width:1000px;margin:auto;padding:14px}
+.card{background:white;padding:16px;border-radius:14px;margin:12px 0;box-shadow:0 2px 10px #102b5010}
+h2,h3{margin-top:0}
+input,select,textarea{width:100%;padding:12px;margin:6px 0 12px;border:1px solid #ccd5e2;border-radius:8px;font-size:16px;background:white}
+button{border:0;border-radius:8px;padding:11px 14px;background:#1769d2;color:white;font-size:15px;cursor:pointer;margin:3px}
+button:disabled{opacity:.55}
+button.secondary{background:#e5edf8;color:#17375e}
 button.danger{background:#b42318}
-nav{display:flex;gap:7px;overflow-x:auto;padding:12px 0}
-nav button{white-space:nowrap}
-nav button.active{background:#087f8c}
+nav{display:flex;gap:6px;overflow-x:auto;padding:12px 0}
+nav button{white-space:nowrap;flex-shrink:0}
 .page{display:none}
 .page.active{display:block}
-.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.stat{background:#eaf2ff;border-radius:10px;padding:13px}
-.stat small{display:block;color:#52637b;margin-bottom:8px}
-.stat strong{font-size:21px;overflow-wrap:anywhere}
-.item{border:1px solid #e1e7ef;border-radius:9px;padding:12px;margin:9px 0;overflow-wrap:anywhere}
-.item p{margin:5px 0;color:#52637b}
-.muted{color:#66758a;font-size:13px}
-#loginBox{max-width:430px;margin:35px auto}
-.hidden{display:none!important}
-.notice{background:#fff4d6;border-radius:8px;padding:11px;margin:10px 0;color:#684d00}
-.good{color:#087443}
-.bad{color:#b42318}
-hr{border:0;border-top:1px solid #e1e7ef;margin:15px 0}
-@media(min-width:700px){.statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat{background:#edf4ff;border-radius:10px;padding:14px}
+.stat strong{display:block;font-size:22px;margin-top:8px;overflow-wrap:anywhere}
+.muted{color:#65738a;font-size:14px}
+.item{border:1px solid #e0e6ef;padding:12px;border-radius:9px;margin:8px 0;overflow-wrap:anywhere}
+.item p{margin:5px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.notice{padding:12px;background:#fff4d6;border-radius:8px;overflow-wrap:anywhere}
+#message{white-space:pre-wrap;overflow-wrap:anywhere}
+small{color:#65738a}
+hr{border:0;border-top:1px solid #e2e8f0;margin:16px 0}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <header>
-<h2>SKS AI Business OS</h2>
-<p>Business Management • Customers • Orders • Payments</p>
+  <h1>SKS Business OS</h1>
+  <p>Business Dashboard · Customers · Orders · AI Agent</p>
 </header>
 
-<div class="wrap">
-<section id="loginBox" class="card">
-<h3>🔐 Admin Login</h3>
-<p class="muted">अपने Supabase Auth user से लॉगिन करें।</p>
-<form id="loginForm">
-<label>Email</label>
-<input id="email" type="email" autocomplete="username" required placeholder="अपना registered email">
-<label>Password</label>
-<input id="password" type="password" autocomplete="current-password" required placeholder="अपना password">
-<button type="submit" id="loginBtn">Login</button>
-</form>
-<p id="loginMsg" class="muted"></p>
+<main>
+<section id="authPanel" class="card">
+  <h2 id="authTitle">Login</h2>
+  <p class="muted">Apne account se business dashboard kholo.</p>
+  <form id="authForm">
+    <label>Email</label>
+    <input id="email" type="email" autocomplete="email" required placeholder="you@example.com">
+    <label>Password</label>
+    <input id="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Kam se kam 6 characters">
+    <button id="authButton" type="submit">Login</button>
+    <button id="switchAuth" class="secondary" type="button">Naya account banayein</button>
+  </form>
+  <p id="authMessage" role="status"></p>
+  <p class="muted">Agar signup ke baad email confirmation maanga jaye, apne email mein aaya confirmation link kholo.</p>
 </section>
 
-<section id="app" class="hidden">
-<div class="card">
-<div id="welcome">आप लॉगिन हैं।</div>
-<button class="secondary" id="refreshBtn">↻ Refresh Data</button>
-<button class="danger" id="logoutBtn">Logout</button>
-<p id="status" class="muted">Cloud connection तैयार हो रहा है...</p>
-</div>
+<section id="appPanel" hidden>
+  <div class="card">
+    <div class="row">
+      <div>
+        <strong>Business Workspace</strong>
+        <p id="userEmail" class="muted"></p>
+      </div>
+      <button id="logoutBtn" class="secondary">Logout</button>
+    </div>
+    <p id="appMessage" role="status"></p>
+  </div>
 
-<nav>
-<button class="active" data-page="dashboard">Dashboard</button>
-<button data-page="customers">Customers</button>
-<button data-page="orders">Orders</button>
-<button data-page="payments">Payments</button>
-<button data-page="expenses">Expenses</button>
-<button data-page="backup">Backup</button>
-<button data-page="aiAgent">🤖 AI Business Agent</button>
-</nav>
+  <nav aria-label="Business pages">
+    <button data-page="dashboard">Dashboard</button>
+    <button data-page="customers">Customers</button>
+    <button data-page="orders">Orders</button>
+    <button data-page="payments">Payments</button>
+    <button data-page="expenses">Expenses</button>
+    <button data-page="aiAgent">🤖 AI Agent</button>
+    <button data-page="backup">Backup</button>
+  </nav>
 
-<section id="dashboard" class="page active">
-<div class="card">
-<h3>📊 Business Dashboard</h3>
-<div class="statgrid">
-<div class="stat"><small>Total Customers</small><strong id="sCustomers">0</strong></div>
-<div class="stat"><small>Total Orders</small><strong id="sOrders">0</strong></div>
-<div class="stat"><small>Order Value</small><strong id="sSales">₹0</strong></div>
-<div class="stat"><small>Payments Received</small><strong id="sPayments">₹0</strong></div>
-<div class="stat"><small>Total Expenses</small><strong id="sExpenses">₹0</strong></div>
-<div class="stat"><small>Pending Order Value</small><strong id="sPending">₹0</strong></div>
-</div>
-</div>
-<div class="card">
-<h3>Recent Orders</h3>
-<div id="recentOrders">अभी कोई order नहीं है।</div>
-</div>
-</section>
+  <section id="dashboard" class="page active">
+    <div class="card">
+      <h2>Business Dashboard</h2>
+      <button id="refreshBtn" class="secondary">Refresh Data</button>
+      <div class="grid">
+        <div class="stat">Customers<strong id="customerCount">0</strong></div>
+        <div class="stat">Orders<strong id="orderCount">0</strong></div>
+        <div class="stat">Order Value<strong id="salesTotal">₹0</strong></div>
+        <div class="stat">Payments<strong id="paymentTotal">₹0</strong></div>
+        <div class="stat">Expenses<strong id="expenseTotal">₹0</strong></div>
+        <div class="stat">Pending Orders<strong id="pendingCount">0</strong></div>
+      </div>
+      <p class="muted">Order value, revenue aur profit alag cheezein hain. Yeh dashboard order value dikhata hai, guaranteed profit nahi.</p>
+    </div>
+    <div class="card">
+      <h3>Recent Orders</h3>
+      <div id="recentOrders"></div>
+    </div>
+  </section>
 
-<section id="customers" class="page">
-<div class="card">
-<h3>➕ Add Customer</h3>
-<form id="customerForm">
-<label>Customer Name *</label><input id="cName" required>
-<label>Phone</label><input id="cPhone" inputmode="tel">
-<label>Address / Area</label><input id="cAddress">
-<label>Opening Balance (₹)</label><input id="cOpening" type="number" min="0" step="0.01" value="0">
-<button type="submit">Save Customer</button>
-</form>
-</div>
-<div class="card">
-<h3>Customer List</h3>
-<input id="customerSearch" placeholder="Customer का नाम या फोन खोजें">
-<div id="customerList"></div>
-</div>
-</section>
+  <section id="customers" class="page">
+    <div class="card">
+      <h2>Add Customer</h2>
+      <form id="customerForm">
+        <label>Customer Name</label>
+        <input name="name" required maxlength="120" placeholder="Customer ka naam">
+        <label>Phone</label>
+        <input name="phone" maxlength="30" placeholder="Phone number">
+        <label>Address</label>
+        <textarea name="address" maxlength="300" placeholder="Address"></textarea>
+        <button type="submit">Save Customer</button>
+      </form>
+    </div>
+    <div class="card"><h3>Customer List</h3><div id="customerList"></div></div>
+  </section>
 
-<section id="orders" class="page">
-<div class="card">
-<h3>➕ Add Order</h3>
-<form id="orderForm">
-<label>Customer *</label><select id="oCustomer" required></select>
-<label>Product *</label>
-<select id="oProduct">
-<option value="20L Jar">20L Jar</option>
-<option value="2L Bottle">2L Bottle</option>
-<option value="1L Bottle">1L Bottle</option>
-<option value="500ml Bottle">500ml Bottle</option>
-<option value="250ml Bottle">250ml Bottle</option>
-<option value="Other">Other</option>
-</select>
-<label>Quantity *</label><input id="oQty" type="number" min="0.01" step="0.01" required value="1">
-<label>Unit Price (₹) *</label><input id="oPrice" type="number" min="0" step="0.01" required>
-<label>Order Date</label><input id="oDate" type="date" required>
-<label>Status</label>
-<select id="oStatus">
-<option>Pending</option><option>Delivered</option><option>Cancelled</option>
-</select>
-<button type="submit">Save Order</button>
-</form>
-</div>
-<div class="card"><h3>Orders List</h3><div id="orderList"></div></div>
-</section>
+  <section id="orders" class="page">
+    <div class="card">
+      <h2>Add Order</h2>
+      <form id="orderForm">
+        <label>Customer Name</label>
+        <input name="customer_name" required maxlength="120" placeholder="Customer ka naam">
+        <label>Product</label>
+        <select name="product_name">
+          <option>20L Jar</option><option>2L Bottle</option>
+          <option>1L Bottle</option><option>500ml Bottle</option>
+          <option>250ml Bottle</option><option>Other</option>
+        </select>
+        <div class="row">
+          <div><label>Quantity</label><input name="quantity" type="number" min="1" step="1" required value="1"></div>
+          <div><label>Price per unit (₹)</label><input name="unit_price" type="number" min="0" step="0.01" required value="0"></div>
+        </div>
+        <label>Order Date</label><input name="order_date" type="date" required>
+        <label>Status</label>
+        <select name="status"><option>Pending</option><option>Delivered</option><option>Cancelled</option></select>
+        <button type="submit">Save Order</button>
+      </form>
+    </div>
+    <div class="card"><h3>Order List</h3><div id="orderList"></div></div>
+  </section>
 
-<section id="payments" class="page">
-<div class="card">
-<h3>➕ Record Payment</h3>
-<form id="paymentForm">
-<label>Customer *</label><select id="pCustomer" required></select>
-<label>Amount (₹) *</label><input id="pAmount" type="number" min="0.01" step="0.01" required>
-<label>Payment Date</label><input id="pDate" type="date" required>
-<label>Payment Method</label>
-<select id="pMethod"><option value="cash">Cash</option><option value="UPI">UPI</option><option value="bank">Bank Transfer</option><option value="other">Other</option></select>
-<label>Notes</label><input id="pNote">
-<button type="submit">Save Payment</button>
-</form>
-</div>
-<div class="card"><h3>Payment History</h3><div id="paymentList"></div></div>
-</section>
+  <section id="payments" class="page">
+    <div class="card">
+      <h2>Record Payment</h2>
+      <form id="paymentForm">
+        <label>Customer Name</label><input name="customer_name" required maxlength="120">
+        <label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
+        <label>Payment Date</label><input name="payment_date" type="date" required>
+        <label>Note</label><input name="note" maxlength="250" placeholder="Cash, UPI, etc.">
+        <button type="submit">Save Payment</button>
+      </form>
+    </div>
+    <div class="card"><h3>Payment History</h3><div id="paymentList"></div></div>
+  </section>
 
-<section id="expenses" class="page">
-<div class="card">
-<h3>➕ Add Expense</h3>
-<form id="expenseForm">
-<label>Category *</label>
-<select id="eCategory"><option>Raw Material</option><option>Transport</option><option>Electricity</option><option>Salary</option><option>Maintenance</option><option>Packaging</option><option>Other</option></select>
-<label>Description</label><input id="eDescription">
-<label>Amount (₹) *</label><input id="eAmount" type="number" min="0.01" step="0.01" required>
-<label>Date</label><input id="eDate" type="date" required>
-<button type="submit">Save Expense</button>
-</form>
-</div>
-<div class="card"><h3>Expense History</h3><div id="expenseList"></div></div>
-</section>
-
-<section id="backup" class="page">
-<div class="card">
-<h3>📦 Data Backup</h3>
-<p>अपने cloud data की JSON backup file डाउनलोड करें। इसे सुरक्षित जगह पर रखें।</p>
-<button id="exportBtn">Download JSON Backup</button>
-<div class="notice">यह संस्करण cloud से डेटा पढ़कर backup डाउनलोड करता है। JSON import अभी चालू नहीं है, ताकि गलती से आपका डेटा overwrite न हो।</div>
+  <section id="expenses" class="page">
+    <div class="card">
+      <h2>Add Expense</h2>
+      <form id="expenseForm">
+        <label>Expense Name</label><input name="title" required maxlength="120" placeholder="Transport, packaging, etc.">
+        <label>Category</label>
+        <select name="category"><option>Transport</option><option>Packaging</option><option>Electricity</option><option>Materials</option><option>Salary</option><option>Other</option></select>
+        <label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" required>
+        <label>Date</label><input name="expense_date" type="date" required>
+        <button type="submit">Save Expense</button>
+      </form>
+    </div>
+    <div class="card"><h3>Expense History</h3><div id="expenseList"></div></div>
+  </section>
 
   <section id="aiAgent" class="page">
-  <div class="card">
-    <h3>🤖 SKS AI Business Agent</h3>
-    <p class="muted">
-      Apne business data ka analysis karo aur Hindi mein
-      useful suggestions pao.
-    </p>
-    <button id="analyzeBusinessBtn">
-      Analyze My Business
-    </button>
-    <div id="aiAnalysis" aria-live="polite">
-      <p class="muted">
-        Analysis shuru karne ke liye button dabayein.
-      </p>
+    <div class="card">
+      <h2>🤖 SKS AI Business Agent</h2>
+      <p class="muted">Apne recorded business data ka Hindi mein analysis aur practical suggestions pao.</p>
+      <button id="analyzeBtn">Analyze My Business</button>
+      <div id="aiAnalysis" aria-live="polite"><p class="muted">Analysis ke liye button dabao.</p></div>
+      <hr>
+      <p class="muted">Yeh version local rules aur tumhare saved data par analysis karta hai. Yeh generative AI model nahi hai aur apne aap orders place ya payments nahi karta.</p>
     </div>
-  </div>
+  </section>
+
+  <section id="backup" class="page">
+    <div class="card">
+      <h2>Backup & Export</h2>
+      <p>Apne business records ki JSON file download karo aur safe jagah par rakho.</p>
+      <button id="backupBtn">Download JSON Backup</button>
+      <p class="muted">Yeh backup download karta hai; data ko automatically restore nahi karta.</p>
+    </div>
+  </section>
 </section>
-</section>
-</div>
+</main>
 
 <script>
-/* STEP 1: नीचे अपने Supabase Project URL और Publishable Key भरें */
-const SUPABASE_URL = "https://vwusylwuueecbbtwlnlm.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UqKfVeI-Fqo1es6uAy4DWA_4H0mGMCZ";
+"use strict";
+
+/* Apne naye Supabase project ki details yahan bharo. */
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY";
 
 const $ = id => document.getElementById(id);
-const money = n => "₹" + Number(n || 0).toLocaleString("en-IN",{maximumFractionDigits:2});
-const today = new Date().toISOString().slice(0,10);
-$("oDate").value = today;
-$("pDate").value = today;
-$("eDate").value = today;
+const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+const money = value => new Intl.NumberFormat("en-IN", {
+  style:"currency", currency:"INR", maximumFractionDigits:2
+}).format(Number(value) || 0);
+const today = () => new Date().toLocaleDateString("en-CA");
 
-let db;
-let data = {customers:[],orders:[],payments:[],expenses:[]};
+let db = null;
+let currentUser = null;
+let authMode = "login";
+let data = {customers:[], orders:[], payments:[], expenses:[]};
 let busy = false;
 
-function message(id, text, good=false){
-  $(id).textContent = text;
-  $(id).className = good ? "good" : "bad";
+function setAuthMessage(message, isError=false) {
+  $("authMessage").textContent = message;
+  $("authMessage").style.color = isError ? "#b42318" : "#176b39";
 }
-function setStatus(text, good=false){
-  $("status").textContent = text;
-  $("status").className = good ? "good" : "muted";
+function setAppMessage(message, isError=false) {
+  $("appMessage").textContent = message;
+  $("appMessage").style.color = isError ? "#b42318" : "#176b39";
 }
-function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>"']/g, ch => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[ch]);
+function showAuth() {
+  $("authPanel").hidden = false;
+  $("appPanel").hidden = true;
 }
-function customerName(id){
-  return data.customers.find(c=>c.id===id)?.name || "Unknown Customer";
+function showApp() {
+  $("authPanel").hidden = true;
+  $("appPanel").hidden = false;
+  $("userEmail").textContent = currentUser?.email || "";
 }
-function runButton(button, fn){
-  button.addEventListener("click", async ()=>{
-    if(busy) return;
-    busy=true;
-    try { await fn(); }
-    catch(e){ alert(e.message || "कुछ गलत हुआ।"); }
-    finally { busy=false; }
+function getForm(form) {
+  return Object.fromEntries(new FormData(form).entries());
+}
+function setDefaultDates() {
+  document.querySelectorAll('input[type="date"]').forEach(el => {
+    if (!el.value) el.value = today();
   });
 }
-function checkConfig(){
-  if(!window.supabase) throw new Error("Supabase library load नहीं हुई। Internet check करें।");
-  if(SUPABASE_URL.includes("PASTE_") || SUPABASE_PUBLISHABLE_KEY.includes("PASTE_")){
-    throw new Error("पहले code में Supabase Project URL और Publishable Key भरें।");
-  }
-  if(!db) db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+function orderValue(o) {
+  return Number(o.quantity || 0) * Number(o.unit_price || 0);
 }
-function showApp(user){
-  $("loginBox").classList.add("hidden");
-  $("app").classList.remove("hidden");
-  $("welcome").textContent="Logged in: "+user.email;
+function statusText(s) {
+  return s === "Delivered" ? "Delivered" : s === "Cancelled" ? "Cancelled" : "Pending";
 }
-function showLogin(){
-  $("app").classList.add("hidden");
-  $("loginBox").classList.remove("hidden");
-}
-async function loadCloudData(){
-  setStatus("Cloud से डेटा लोड हो रहा है...");
-  const names=["customers","orders","payments","expenses"];
-  const results=await Promise.all(names.map(name=>db.from(name).select("*")));
-  for(let i=0;i<results.length;i++){
-    if(results[i].error) throw results[i].error;
-    data[names[i]]=results[i].data || [];
-  }
-  data.customers.sort((a,b)=>a.name.localeCompare(b.name));
-  data.orders.sort((a,b)=>String(b.order_date).localeCompare(String(a.order_date)));
-  data.payments.sort((a,b)=>String(b.payment_date).localeCompare(String(a.payment_date)));
-  data.expenses.sort((a,b)=>String(b.expense_date).localeCompare(String(a.expense_date)));
-  renderAll();
-  setStatus("Cloud data sync सफल ✓",true);
-}
-function renderAll(){
-  $("sCustomers").textContent=data.customers.length;
-  $("sOrders").textContent=data.orders.length;
-  $("sSales").textContent=money(data.orders.filter(o=>o.status!=="Cancelled").reduce((s,o)=>s+Number(o.total_amount||Number(o.quantity)*Number(o.unit_price)),0));
-  $("sPayments").textContent=money(data.payments.reduce((s,p)=>s+Number(p.amount),0));
-  $("sExpenses").textContent=money(data.expenses.reduce((s,e)=>s+Number(e.amount),0));
-  $("sPending").textContent=money(data.orders.filter(o=>o.status==="Pending").reduce((s,o)=>s+Number(o.total_amount||Number(o.quantity)*Number(o.unit_price)),0));
-  renderCustomers();
-  renderOrders();
-  renderPayments();
-  renderExpenses();
-  renderCustomerOptions();
-  $("recentOrders").innerHTML=data.orders.slice(0,5).map(orderCard).join("") || "अभी कोई order नहीं है।";
-}
-function renderCustomerOptions(){
-  const options='<option value="">Customer चुनें</option>'+data.customers.map(c=>`<option value="${c.id}">${escapeHTML(c.name)}${c.phone?" — "+escapeHTML(c.phone):""}</option>`).join("");
-  $("oCustomer").innerHTML=options;
-  $("pCustomer").innerHTML=options;
-}
-function renderCustomers(){
-  const q=$("customerSearch").value.toLowerCase();
-  const list=data.customers.filter(c=>(c.name+" "+(c.phone||"")+" "+(c.address||"")).toLowerCase().includes(q));
-  $("customerList").innerHTML=list.map(c=>`
-    <div class="item">
-      <b>${escapeHTML(c.name)}</b>
-      <p>📞 ${escapeHTML(c.phone||"—")}</p>
-      <p>📍 ${escapeHTML(c.address||"—")}</p>
-      <p>Opening Balance: ${money(c.opening_balance)}</p>
-      <button class="danger" data-delete-customer="${c.id}">Delete</button>
-    </div>`).join("") || "<p class='muted'>Customer नहीं मिला।</p>";
-}
-function orderCard(o){
+function itemHTML(title, details, id, table, statusButtons=false) {
   return `<div class="item">
-    <b>${escapeHTML(customerName(o.customer_id))}</b>
-    <p>${escapeHTML(o.product_name)} • Qty: ${escapeHTML(o.quantity)} × ${money(o.unit_price)}</p>
-    <p>Total: <b>${money(o.total_amount ?? Number(o.quantity)*Number(o.unit_price))}</b></p>
-    <p>Date: ${escapeHTML(o.order_date)} • Status: ${escapeHTML(o.status)}</p>
-    <button class="secondary" data-status="${o.id}" data-next="${o.status==="Pending"?"Delivered":"Pending"}">Mark ${o.status==="Pending"?"Delivered":"Pending"}</button>
-    <button class="danger" data-delete-order="${o.id}">Delete</button>
+    <strong>${escapeHTML(title)}</strong>
+    <p>${details}</p>
+    ${statusButtons ? `
+      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Pending">Pending</button>
+      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Delivered">Delivered</button>
+      <button class="secondary" data-action="status" data-id="${escapeHTML(id)}" data-status="Cancelled">Cancelled</button>` : ""}
+    <button class="danger" data-action="delete" data-id="${escapeHTML(id)}" data-table="${table}">Delete</button>
   </div>`;
 }
-function renderOrders(){
-  $("orderList").innerHTML=data.orders.map(orderCard).join("") || "<p class='muted'>अभी कोई order नहीं है।</p>";
-}
-function renderPayments(){
-  $("paymentList").innerHTML=data.payments.map(p=>`
-    <div class="item">
-      <b>${escapeHTML(customerName(p.customer_id))} — ${money(p.amount)}</b>
-      <p>${escapeHTML(p.payment_date)} • ${escapeHTML(p.payment_method)}</p>
-      <p>${escapeHTML(p.notes||"")}</p>
-      <button class="danger" data-delete-payment="${p.id}">Delete</button>
-    </div>`).join("") || "<p class='muted'>अभी कोई payment नहीं है।</p>";
-}
-function renderExpenses(){
-  $("expenseList").innerHTML=data.expenses.map(e=>`
-    <div class="item">
-      <b>${escapeHTML(e.category)} — ${money(e.amount)}</b>
-      <p>${escapeHTML(e.expense_date)} • ${escapeHTML(e.description||"")}</p>
-      <button class="danger" data-delete-expense="${e.id}">Delete</button>
-    </div>`).join("") || "<p class='muted'>अभी कोई expense नहीं है।</p>";
-}
-async function insertRow(table,row){
-  const {error}=await db.from(table).insert(row);
-  if(error) throw error;
-  await loadCloudData();
-}
-async function deleteRow(table,id){
-  if(!confirm("क्या आप इस record को delete करना चाहते हैं?")) return;
-  const {error}=await db.from(table).delete().eq("id",id);
-  if(error) throw error;
-  await loadCloudData();
-}
-function analyzeBusiness(){
-  const box = $("aiAnalysis");
+function renderAll() {
+  $("customerCount").textContent = data.customers.length;
+  $("orderCount").textContent = data.orders.length;
+  const validOrders = data.orders.filter(o => o.status !== "Cancelled");
+  $("salesTotal").textContent = money(validOrders.reduce((s,o)=>s+orderValue(o),0));
+  $("paymentTotal").textContent = money(data.payments.reduce((s,p)=>s+Number(p.amount||0),0));
+  $("expenseTotal").textContent = money(data.expenses.reduce((s,e)=>s+Number(e.amount||0),0));
+  $("pendingCount").textContent = data.orders.filter(o=>o.status==="Pending").length;
 
-  if(!data.customers.length &&
-     !data.orders.length &&
-     !data.payments.length &&
-     !data.expenses.length){
-    box.innerHTML =
-      "<p>Abhi business data nahi mila. Pehle records add karein.</p>";
+  $("customerList").innerHTML = data.customers.length ? data.customers.map(c =>
+    itemHTML(c.name, `Phone: ${escapeHTML(c.phone || "—")}<br>Address: ${escapeHTML(c.address || "—")}`, c.id, "customers")
+  ).join("") : "<p class='muted'>Abhi koi customer nahi hai.</p>";
+
+  const sortedOrders = [...data.orders].sort((a,b)=>(b.order_date||"").localeCompare(a.order_date||""));
+  $("orderList").innerHTML = sortedOrders.length ? sortedOrders.map(o =>
+    itemHTML(`${o.customer_name} — ${o.product_name}`,
+      `Date: ${escapeHTML(o.order_date)}<br>Quantity: ${escapeHTML(o.quantity)} × ${money(o.unit_price)} = <strong>${money(orderValue(o))}</strong><br>Status: ${escapeHTML(statusText(o.status))}`,
+      o.id, "orders", true)
+  ).join("") : "<p class='muted'>Abhi koi order nahi hai.</p>";
+
+  $("recentOrders").innerHTML = sortedOrders.slice(0,5).map(o =>
+    `<div class="item"><strong>${escapeHTML(o.customer_name)}</strong>
+    <p>${escapeHTML(o.product_name)} · ${escapeHTML(o.quantity)} units · ${money(orderValue(o))}</p>
+    <small>${escapeHTML(o.order_date)} · ${escapeHTML(statusText(o.status))}</small></div>`
+  ).join("") || "<p class='muted'>Orders add karne par yahan dikhengi.</p>";
+
+  $("paymentList").innerHTML = data.payments.length ? [...data.payments].sort((a,b)=>(b.payment_date||"").localeCompare(a.payment_date||"")).map(p =>
+    itemHTML(`${p.customer_name} — ${money(p.amount)}`,
+      `Date: ${escapeHTML(p.payment_date)}<br>Note: ${escapeHTML(p.note || "—")}`, p.id, "payments")
+  ).join("") : "<p class='muted'>Abhi koi payment nahi hai.</p>";
+
+  $("expenseList").innerHTML = data.expenses.length ? [...data.expenses].sort((a,b)=>(b.expense_date||"").localeCompare(a.expense_date||"")).map(e =>
+    itemHTML(`${e.title} — ${money(e.amount)}`,
+      `Category: ${escapeHTML(e.category || "Other")}<br>Date: ${escapeHTML(e.expense_date)}`, e.id, "expenses")
+  ).join("") : "<p class='muted'>Abhi koi expense nahi hai.</p>";
+}
+
+async function loadCloudData() {
+  if (!db || !currentUser) return;
+  setAppMessage("Data load ho raha hai...");
+  const tables = ["customers","orders","payments","expenses"];
+  const results = await Promise.all(tables.map(table =>
+    db.from(table).select("*").order("created_at",{ascending:false}).limit(1000)
+  ));
+  const failed = results.find(r => r.error);
+  if (failed) {
+    setAppMessage("Data load nahi hua: " + failed.error.message, true);
     return;
   }
-
-  const validOrders = data.orders.filter(
-    o => o.status !== "Cancelled"
-  );
-
-  const sales = validOrders.reduce(
-    (sum,o) => sum + Number(
-      o.total_amount ??
-      (Number(o.quantity) * Number(o.unit_price))
-    ), 0
-  );
-
-  const received = data.payments.reduce(
-    (sum,p) => sum + Number(p.amount || 0), 0
-  );
-
-  const expenses = data.expenses.reduce(
-    (sum,e) => sum + Number(e.amount || 0), 0
-  );
-
-  const pending = data.orders.filter(
-    o => o.status === "Pending"
-  );
-
-  const pendingValue = pending.reduce(
-    (sum,o) => sum + Number(
-      o.total_amount ??
-      (Number(o.quantity) * Number(o.unit_price))
-    ), 0
-  );
-
-  const productTotals = {};
-
-  validOrders.forEach(o => {
-    const product = o.product_name || "Other";
-    productTotals[product] =
-      (productTotals[product] || 0) +
-      Number(o.quantity || 0);
-  });
-
-  const topProduct = Object.entries(productTotals)
-    .sort((a,b) => b[1] - a[1])[0];
-
-  const insights = [];
-
-  insights.push(
-    `📊 कुल ग्राहकों की संख्या: ${data.customers.length}`
-  );
-
-  insights.push(
-    `📦 रद्द orders छोड़कर order value: ${money(sales)}`
-  );
-
-  insights.push(
-    `💰 दर्ज payments: ${money(received)}`
-  );
-
-  insights.push(
-    `🧾 दर्ज expenses: ${money(expenses)}`
-  );
-
-  insights.push(
-    `⏳ Pending orders: ${pending.length} (${money(pendingValue)})`
-  );
-
-  if(topProduct){
-    insights.push(
-      `⭐ Quantity के हिसाब से सबसे ज्यादा order वाला product: ${topProduct[0]} (${topProduct[1]} units)`
-    );
-  }
-
-  const suggestions = [];
-
-  if(pending.length > 0){
-    suggestions.push(
-      `${pending.length} pending orders check karo aur delivery status update karo.`
-    );
-  } else {
-    suggestions.push(
-      "Koi pending order nahi hai. Naye orders aur repeat customers par dhyan do."
-    );
-  }
-
-  if(data.customers.length > 0){
-    suggestions.push(
-      "Customer list ka use karke repeat orders aur payment records regularly check karo."
-    );
-  }
-
-  if(expenses > 0){
-    suggestions.push(
-      "Expenses ki categories review karo aur transport, packaging aur electricity ke kharch track karo."
-    );
-  }
-
-  if(data.orders.length === 0){
-    suggestions.push(
-      "Sales trends samajhne ke liye asli orders record karna shuru karo."
-    );
-  }
-
-  box.innerHTML = `
-    <hr>
-    <h3>📈 Business Report</h3>
-    ${insights.map(x =>
-      `<p>${escapeHTML(x)}</p>`
-    ).join("")}
-    <h3>💡 Hindi Suggestions</h3>
-    <ul>
-      ${suggestions.map(x =>
-        `<li>${escapeHTML(x)}</li>`
-      ).join("")}
-    </ul>
-    <p class="muted">
-      Note: Ye rules-based analysis hai. Order value profit nahi hai.
-      Sahi profit ke liye product ki purchase/manufacturing cost,
-      delivery aur doosre business costs bhi record karne honge.
-      Payments aur order value ka difference actual outstanding
-      balance nahi maana ja sakta.
-    </p>
-  `;
+  data = {
+    customers:results[0].data || [],
+    orders:results[1].data || [],
+    payments:results[2].data || [],
+    expenses:results[3].data || []
+  };
+  renderAll();
+  setAppMessage("Data successfully load ho gaya.");
 }
 
-$("analyzeBusinessBtn").addEventListener(
-  "click",
-  analyzeBusiness
-);
-
-/* Login */
-$("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  $("loginBtn").disabled=true;
-  message("loginMsg","लॉगिन हो रहा है...");
-  try{
-    checkConfig();
-    const {data:result,error}=await db.auth.signInWithPassword({
-      email:$("email").value.trim(),
-      password:$("password").value
+async function saveRecord(table, values, form) {
+  if (!currentUser || busy) return;
+  busy = true;
+  const submit = form.querySelector('button[type="submit"]');
+  if (submit) submit.disabled = true;
+  try {
+    const result = await db.from(table).insert({
+      ...values, user_id:currentUser.id
     });
-    if(error) throw error;
-    showApp(result.user);
+    if (result.error) throw result.error;
+    form.reset();
+    setDefaultDates();
     await loadCloudData();
-    message("loginMsg","Login सफल",true);
-  }catch(err){message("loginMsg","Error: "+err.message);}
-  finally{$("loginBtn").disabled=false;}
-});
+    setAppMessage("Record save ho gaya.");
+  } catch (e) {
+    setAppMessage("Save nahi hua: " + (e.message || "Unknown error"), true);
+  } finally {
+    busy = false;
+    if (submit) submit.disabled = false;
+  }
+}
 
-/* Add customer */
-$("customerForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  try{
-    if(!$("cName").value.trim()) throw new Error("Customer का नाम भरें।");
-    await insertRow("customers",{
-      name:$("cName").value.trim(),
-      phone:$("cPhone").value.trim()||null,
-      address:$("cAddress").value.trim()||null,
-      opening_balance:Number($("cOpening").value||0)
-    });
-    e.target.reset();$("cOpening").value="0";
-    alert("Customer save हो गया।");
-  }catch(err){alert("Save error: "+err.message);}
-});
-
-/* Add order */
-$("orderForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  try{
-    if(!$("oCustomer").value) throw new Error("पहले customer चुनें।");
-    await insertRow("orders",{
-      customer_id:$("oCustomer").value,
-      product_name:$("oProduct").value,
-      quantity:Number($("oQty").value),
-      unit_price:Number($("oPrice").value),
-      order_date:$("oDate").value||today,
-      status:$("oStatus").value
-    });
-    e.target.reset();$("oDate").value=today;$("oQty").value="1";
-    alert("Order save हो गया।");
-  }catch(err){alert("Order error: "+err.message);}
-});
-
-/* Add payment */
-$("paymentForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  try{
-    if(!$("pCustomer").value) throw new Error("पहले customer चुनें।");
-    await insertRow("payments",{
-      customer_id:$("pCustomer").value,
-      amount:Number($("pAmount").value),
-      payment_date:$("pDate").value||today,
-      payment_method:$("pMethod").value,
-      notes:$("pNote").value.trim()||null
-    });
-    e.target.reset();$("pDate").value=today;
-    alert("Payment save हो गया।");
-  }catch(err){alert("Payment error: "+err.message);}
-});
-
-/* Add expense */
-$("expenseForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  try{
-    await insertRow("expenses",{
-      category:$("eCategory").value,
-      description:$("eDescription").value.trim()||null,
-      amount:Number($("eAmount").value),
-      expense_date:$("eDate").value||today
-    });
-    e.target.reset();$("eDate").value=today;
-    alert("Expense save हो गया।");
-  }catch(err){alert("Expense error: "+err.message);}
-});
-
-/* List actions */
-document.addEventListener("click",async e=>{
-  const b=e.target.closest("button");
-  if(!b) return;
-  try{
-    if(b.dataset.deleteCustomer){
-      const id=b.dataset.deleteCustomer;
-      if(data.orders.some(o=>o.customer_id===id)||data.payments.some(p=>p.customer_id===id)){
-        alert("इस customer के orders या payments मौजूद हैं। पहले संबंधित records संभालें।");
-        return;
-      }
-      await deleteRow("customers",id);
+$("authForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!db) {
+    setAuthMessage("Supabase configuration missing hai. URL aur publishable key check karo.", true);
+    return;
+  }
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  const button = $("authButton");
+  button.disabled = true;
+  setAuthMessage(authMode === "login" ? "Login ho raha hai..." : "Account ban raha hai...");
+  try {
+    let result;
+    if (authMode === "login") {
+      result = await db.auth.signInWithPassword({email,password});
+    } else {
+      result = await db.auth.signUp({email,password});
     }
-    if(b.dataset.deleteOrder) await deleteRow("orders",b.dataset.deleteOrder);
-    if(b.dataset.deletePayment) await deleteRow("payments",b.dataset.deletePayment);
-    if(b.dataset.deleteExpense) await deleteRow("expenses",b.dataset.deleteExpense);
-    if(b.dataset.status){
-      const {error}=await db.from("orders").update({status:b.dataset.next}).eq("id",b.dataset.status);
-      if(error) throw error;
-      await loadCloudData();
+    if (result.error) throw result.error;
+    if (authMode === "signup" && !result.data.session) {
+      setAuthMessage("Account request ho gayi. Apna email confirmation link kholo, phir login karo.");
+    } else {
+      setAuthMessage(authMode === "login" ? "Login successful." : "Account created.");
     }
-  }catch(err){alert("Action error: "+err.message);}
+  } catch (e) {
+    setAuthMessage("Login/signup fail hua: " + (e.message || "Unknown error"), true);
+  } finally {
+    button.disabled = false;
+  }
 });
 
-$("customerSearch").addEventListener("input",renderCustomers);
-document.querySelectorAll("nav button[data-page]").forEach(b=>{
-  b.addEventListener("click",()=>{
-    document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    $(b.dataset.page).classList.add("active");
+$("switchAuth").addEventListener("click", () => {
+  authMode = authMode === "login" ? "signup" : "login";
+  $("authTitle").textContent = authMode === "login" ? "Login" : "Create Account";
+  $("authButton").textContent = authMode === "login" ? "Login" : "Sign Up";
+  $("switchAuth").textContent = authMode === "login" ? "Naya account banayein" : "Pehle se account hai? Login";
+  $("password").autocomplete = authMode === "login" ? "current-password" : "new-password";
+  setAuthMessage("");
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  const {error} = await db.auth.signOut();
+  if (error) setAppMessage("Logout fail hua: " + error.message, true);
+});
+
+document.querySelectorAll("nav [data-page]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    $(button.dataset.page).classList.add("active");
   });
 });
 
-runButton($("refreshBtn"),loadCloudData);
-runButton($("logoutBtn"),async()=>{
-  const {error}=await db.auth.signOut();
-  if(error) throw error;
-  data={customers:[],orders:[],payments:[],expenses:[]};
-  showLogin();
-  message("loginMsg","आप logout हो गए हैं।",true);
+$("customerForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.currentTarget, v = getForm(f);
+  await saveRecord("customers", {
+    name:v.name.trim(), phone:v.phone.trim(), address:v.address.trim()
+  }, f);
 });
-runButton($("exportBtn"),async()=>{
-  const backup={
-    exported_at:new Date().toISOString(),
-    customers:data.customers,
-    orders:data.orders,
-    payments:data.payments,
-    expenses:data.expenses
-  };
-  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="SKS_Business_Backup_"+today+".json";
-  a.click();URL.revokeObjectURL(url);
+$("orderForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f=e.currentTarget, v=getForm(f);
+  await saveRecord("orders", {
+    customer_name:v.customer_name.trim(), product_name:v.product_name,
+    quantity:Number(v.quantity), unit_price:Number(v.unit_price),
+    status:v.status, order_date:v.order_date
+  },f);
+});
+$("paymentForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f=e.currentTarget,v=getForm(f);
+  await saveRecord("payments", {
+    customer_name:v.customer_name.trim(), amount:Number(v.amount),
+    payment_date:v.payment_date, note:v.note.trim()
+  },f);
+});
+$("expenseForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f=e.currentTarget,v=getForm(f);
+  await saveRecord("expenses", {
+    title:v.title.trim(), category:v.category,
+    amount:Number(v.amount), expense_date:v.expense_date
+  },f);
 });
 
-/* Restore existing login session after page refresh */
-(async()=>{
-  try{
-    checkConfig();
-    const {data:result,error}=await db.auth.getSession();
-    if(error) throw error;
-    if(result.session){
-      showApp(result.session.user);
+document.addEventListener("click", async e => {
+  const button = e.target.closest("button[data-action]");
+  if (!button || !currentUser || busy) return;
+  const id=button.dataset.id;
+  const table=button.dataset.table;
+  if (button.dataset.action === "delete") {
+    if (!["customers","orders","payments","expenses"].includes(table)) return;
+    if (!confirm("Kya tum is record ko delete karna chahte ho?")) return;
+    busy=true;
+    try {
+      const {error}=await db.from(table).delete().eq("id",id).eq("user_id",currentUser.id);
+      if (error) throw error;
       await loadCloudData();
-    }
-  }catch(err){
-    message("loginMsg","Setup: "+err.message);
+      setAppMessage("Record delete ho gaya.");
+    } catch(err) {
+      setAppMessage("Delete fail hua: "+err.message,true);
+    } finally { busy=false; }
+  } else if (button.dataset.action === "status") {
+    busy=true;
+    try {
+      const {error}=await db.from("orders").update({status:button.dataset.status})
+        .eq("id",id).eq("user_id",currentUser.id);
+      if(error) throw error;
+      await loadCloudData();
+    } catch(err) {
+      setAppMessage("Status update nahi hua: "+err.message,true);
+    } finally { busy=false; }
   }
-})();
+});
+
+$("refreshBtn").addEventListener("click", loadCloudData);
+
+$("analyzeBtn").addEventListener("click", () => {
+  const box=$("aiAnalysis");
+  const valid=data.orders.filter(o=>o.status!=="Cancelled");
+  const sales=valid.reduce((s,o)=>s+orderValue(o),0);
+  const paid=data.payments.reduce((s,p)=>s+Number(p.amount||0),0);
+  const expenses=data.expenses.reduce((s,x)=>s+Number(x.amount||0),0);
+  const pending=data.orders.filter(o=>o.status==="Pending");
+  const pendingValue=pending.reduce((s,o)=>s+orderValue(o),0);
+  const products={};
+  valid.forEach(o=>{
+    products[o.product_name]=(products[o.product_name]||0)+Number(o.quantity||0);
+  });
+  const top=Object.entries(products).sort((a,b)=>b[1]-a[1])[0];
+  const lines=[
+    `Customers: ${data.customers.length}`,
+    `Non-cancelled order value: ${money(sales)}`,
+    `Recorded payments: ${money(paid)}`,
+    `Recorded expenses: ${money(expenses)}`,
+    `Pending orders: ${pending.length} (${money(pendingValue)})`
+  ];
+  if(top) lines.push(`Quantity ke hisaab se top product: ${top[0]} (${top[1]} units)`);
+  const tips=[];
+  if(pending.length) tips.push(`${pending.length} pending orders ki delivery aur status check karo.`);
+  else tips.push("Koi pending order nahi hai. Repeat customers aur naye orders par dhyan do.");
+  if(data.customers.length) tips.push("Customer details aur payment records ko regularly update karo.");
+  if(expenses>0) tips.push("Transport, packaging aur electricity expenses ko categories ke hisaab se compare karo.");
+  if(!data.orders.length) tips.push("Sales report ke liye real orders record karna shuru karo.");
+  box.innerHTML=`<hr><h3>Business Report</h3>${lines.map(x=>`<p>${escapeHTML(x)}</p>`).join("")}<h3>Suggestions</h3><ul>${tips.map(x=>`<li>${escapeHTML(x)}</li>`).join("")}</ul><p class="muted">Important: Order value profit nahi hai. Payment total ko order value se minus karke outstanding balance mat mano, kyunki payments order-specific nahi hain. Accurate profit ke liye production/purchase cost aur doosre kharche bhi chahiye.</p>`;
+});
+
+$("backupBtn").addEventListener("click", () => {
+  if (!currentUser) return;
+  const payload = {
+    exported_at:new Date().toISOString(),
+    customers:data.customers, orders:data.orders,
+    payments:data.payments, expenses:data.expenses
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="SKS-Business-Backup.json"; a.click();
+  URL.revokeObjectURL(url);
+});
+
+async function startApp() {
+  if (!SUPABASE_URL.startsWith("https://") ||
+      SUPABASE_URL.includes("PASTE_") ||
+      SUPABASE_PUBLISHABLE_KEY.includes("PASTE_") ||
+      !SUPABASE_PUBLISHABLE_KEY) {
+    setAuthMessage("Setup baaki hai: code mein apna Supabase Project URL aur publishable key bharo.", true);
+    return;
+  }
+  try {
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const {data:sessionData,error}=await db.auth.getSession();
+    if (error) throw error;
+    currentUser=sessionData.session?.user || null;
+    if(currentUser) {
+      showApp();
+      await loadCloudData();
+    } else {
+      showAuth();
+    }
+    db.auth.onAuthStateChange((_event,session) => {
+      setTimeout(async () => {
+        currentUser=session?.user || null;
+        if(currentUser) {
+          showApp();
+          await loadCloudData();
+        } else {
+          data={customers:[],orders:[],payments:[],expenses:[]};
+          showAuth();
+        }
+      },0);
+    });
+  } catch(e) {
+    showAuth();
+    setAuthMessage("App initialize nahi hua: "+(e.message || "Configuration check karo."),true);
+  }
+}
+setDefaultDates();
+startApp();
 </script>
 </body>
 </html>
-
